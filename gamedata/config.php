@@ -4,21 +4,21 @@
 define('GAME_TIMEZONE', 'Asia/Shanghai');
 
 //Mod Configuration
-define('MOD_NAME', 'bra');
+define('MOD_NAME', 'dtsp');
 
 //Lock Configuration
 define('FILE_LOCK', false);
 define('FILE_LOCK_PATH', ROOT_DIR.'/brn.lock');
 
 //Cookie Configuration
-define('COOKIE_PREFIX', 'BRN_');
+define('COOKIE_PREFIX', 'ACBR_');
 
 //Cache Configuration
 define('CACHE_TYPE', 'file'); //Available: file memcache
 $CACHE_CONFIG = array(
 	'file' => array(
 		'directory' => ROOT_DIR.'/cache'
-		),
+		), 
 	'memcache' => array(
 		'host' => '127.0.0.1',
 		'port' => 11211,
@@ -30,16 +30,16 @@ $CACHE_CONFIG = array(
 define('DB_TYPE', 'pdo_mysql'); //Available: mysql mongodb pdo_mysql
 define('DB_HOST_M', 'localhost');
 define('DB_HOST_S', false);
-define('DB_PERSISTENT', false);
-define('DB_USER', '');
-define('DB_PASS', '');
-define('DB_NAME', '');
+define('DB_PERSISTENT', true);
+define('DB_USER', 'root');
+define('DB_PASS', 'root');
+define('DB_NAME', 'brn');
 define('DB_TABLE_PREFIX', 'brn_');
 
 //Comet Configuration
 define('COMET_SLEEP', 250000); //Microseconds
 define('COMET_TIMEOUT', 25); //Seconds
-define('COMET_TYPE', 'file'); //Available: file mongodb memcache memcache_SAE channel_SAE chlorocomet
+define('COMET_TYPE', 'file'); //Available: file mongodb memcache memcache_SAE channel_SAE
 $COMET_CONFIG = array(
 	'file' => array(
 		'dir' => 'cache/comet'
@@ -70,4 +70,4 @@ $COMET_CONFIG = array(
 
 //Template Configuration
 define('TEMPLATE_DIR', ROOT_DIR.'/template');
-define('TEMPLATE_NAME', 'default');
+define('TEMPLATE_NAME', 'dtsp');
