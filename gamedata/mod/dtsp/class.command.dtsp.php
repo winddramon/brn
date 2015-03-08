@@ -44,6 +44,11 @@ class command_dtsp extends command_bra
 				$cplayer->wound_dressing($param['position']);
 				break;
 			
+			case 'compose':
+				include(get_mod_path('dtsp').'/include/inc.itemmix.dtsp.php');
+				parent::action_handler($action, $param);
+				break;
+			
 			default:
 				parent::action_handler($action, $param);
 				break;
