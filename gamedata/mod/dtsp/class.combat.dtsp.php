@@ -549,6 +549,37 @@ class combat_dtsp extends combat_bra
 		return $rate;
 	}
 	
+	protected function calc_damage_modulus(){//把伤害增减都堆到这里
+		//防具对伤害的影响，可以被攻击者的贯穿武器撤销
+		$damage_modulus = 1;
+		$atk_pierce_rate = 0;
+		if(isset($this->attacker->equipment['wep']['sk']['atk-pierce'])){
+			$atk_pierce_rate = $this->attacker->equipment['wep']['sk']['atk-pierce'];
+		}
+		if(!determine($atk_pierce_rate)){//无贯穿或者贯穿失效才判断防具效果
+			//盾牌效果
+			if(isset($this->defender->equipment['ara']['sk']['shield'])){
+				if(determine($this->defender->equipment['ara']['sk']['shield'])){
+					$this->feedback($this->defender->name.' 的 '.$this->defender->equipment['ara']['n'].' 发动格挡，没有造成伤害');
+					$damage_modulus = 0;
+					return $damage_modulus;
+				}
+			}
+			
+			//防各系效果
+			if(isset($this->defender->equipment['arb']['sk']['anti-'. strtoupper($this->kind) ])){
+				$anti_wep_rate = intval($this->defender->equipment['arb']['sk']['anti-'.strtoupper($this->kind)]);
+				$this->feedback($this->defender->name.' 的 '.$this->defender->equipment['arb']['n'].' 抵消了 '.$anti_wep_rate.'% 的伤害！');
+				$damage_modulus *= (100 - $anti_wep_rate) / 100;
+			}
+			
+		}else{
+			$this->feedback($this->attacker->name.' 的 '.$this->attacker->equipment['wep']['n'].' 贯穿了 '.$this->defender->name.' 的防具！');
+		}
+		
+		return $damage_modulus;
+	}
+	
 	protected function calc_damage($ma_modulus)
 	{
 		//花昙
@@ -557,12 +588,12 @@ class combat_dtsp extends combat_bra
 		}
 		
 		//盾牌效果
-		if(isset($this->defender->equipment['ara']['sk']['shield'])){
-			if(determine($this->defender->equipment['ara']['sk']['shield'])){
-				$this->feedback($this->defender->name.' 的 '.$this->defender->equipment['ara']['n'].' 发动格挡，没有造成伤害');
-				return 0;
-			}
-		}
+//		if(isset($this->defender->equipment['ara']['sk']['shield'])){
+//			if(determine($this->defender->equipment['ara']['sk']['shield'])){
+//				$this->feedback($this->defender->name.' 的 '.$this->defender->equipment['ara']['n'].' 发动格挡，没有造成伤害');
+//				return 0;
+//			}
+//		}
 		
 		foreach($this->defender->buff as &$buff){
 			switch($buff['type']){
@@ -580,8 +611,16 @@ class combat_dtsp extends combat_bra
 					break;
 			}
 		}
+		//把防各系武器的系数放到独立方法里去
+//		$damage = parent::calc_damage($ma_modulus);
+
+		$damage = $this->modulus_proficiency() * $this->modulus_critical_hit() * $this->modulus_attack() / $this->modulus_defend() * $ma_modulus;
+		if($this->kind === 'd'){
+			$damage += $this->attacker->equipment['wep']['e'];
+		}
+		$damage *= $this->calc_damage_modulus();
 		
-		$damage = parent::calc_damage($ma_modulus);
+		//伤害浮动系数
 		$modulus = 1;
 		
 		foreach($this->attacker->buff as &$buff){
@@ -619,7 +658,6 @@ class combat_dtsp extends combat_bra
 			}
 		}
 		
-		//浮动伤害
 		$damage *= $modulus * $this->calc_damage_float();
 		
 		return $damage;
@@ -705,7 +743,22 @@ class combat_dtsp extends combat_bra
 		}
 	}
 	
-	
+	protected function modulus_defend()
+	{
+		global $modulus_defend;
+		
+		$def = parent::modulus_defend();
+		
+		if(isset($this->attacker->data['equipment']['wep']['sk']['atk-explode'])){//爆炸武器使防御力减少，参数为百分比
+			$expl_modu = intval($this->attacker->data['equipment']['wep']['sk']['atk-explode']);
+			if($expl_modu > 100){$expl_modu = 100;}
+			elseif($expl_modu < 0){$expl_modu = 0;}
+			$def *= (100 - $expl_modu) / 100;
+			$this->feedback($this->attacker->data['equipment']['wep']['n'].'造成了爆炸伤害！'.$this->defender->name.'的防御力被削减了'.$expl_modu.'%！');
+		}
+		
+		return $def;
+	}
 }
 
 ?>

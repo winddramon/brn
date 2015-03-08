@@ -147,6 +147,10 @@ $sk_define = array(
 		'name' => '弹匣',
 		'help' => 'TODO',
 		'disp' => false),
+	'ammo' => array(
+		'name' => '消音',
+		'help' => '攻击时不会发出声响',
+		'disp' => true),
 	'alt' => array(
 		'name' => '形态切换',
 		'help' => '可以切换武器形态',
@@ -167,8 +171,8 @@ $sk_define = array(
 		'name' => '带毒',
 		'help' => '攻击附带毒属性',
 		'disp' => true),
-	'atk-explode' => array('name' => '爆炸攻击', 'help' => '无视敌方一定比例的防御力', 'disp' => true),//TODO
-	'atk-pierce' => array('name' => '贯穿攻击', 'help' => '有机会无视对方的防御属性', 'disp' => true),//TODO
+	'atk-explode' => array('name' => '冲击', 'help' => '无视敌方一定比例的防御力', 'disp' => true),
+	'atk-pierce' => array('name' => '贯穿', 'help' => '有机会无视对方的防御属性', 'disp' => true),//TODO
 	'atk-fire' => array('name' => '火焰攻击', 'help' => '攻击附带火焰属性，可能造成敌人烧伤，但对有防护的敌人效果差', 'disp' => true),//TODO
 	'atk-shock' => array('name' => '电击', 'help' => '攻击附带电击属性，可能造成敌人麻痹，但对有防护的敌人效果差', 'disp' => true),//TODO
 	'atk-freeze' => array('name' => '冰冻攻击', 'help' => '攻击附带冰冻属性，可能造成敌人冻结，但对有防护的敌人效果差', 'disp' => true),//TODO
@@ -176,17 +180,7 @@ $sk_define = array(
 	'def-anti-multiple' => array('name' => '自动防御', 'help' => '敌方多重攻击除第1次攻击以外，每一次攻击的伤害大幅减少', 'disp' => true),//TODO
 	'def-anti-multistage' => array('name' => '自动防御', 'help' => '敌方多重攻击除第1次攻击以外，每一次攻击的伤害大幅减少', 'disp' => true),//TODO
 	);
-	
-//$sk_combat = array(//作战属性定义
-//	'attack' => array(
-//		'atk-explode' => array(
-//			'weapon-only' = true,
-//			
-//		)
-//	),
-//	'defend' => array(
-//	)
-//);
+
 
 //陷阱致伤率（各部位单独计算）
 $trap_injure_rate = 25;
