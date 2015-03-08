@@ -14,7 +14,7 @@ class combat_dtsp extends combat_bra
 		}
 	}
 	
-	public function attack($counter = false, $extra = false)
+	public function attack_without_counter($extra = false)
 	{
 		$this->extra_attack = $extra;
 		$this->attacker->data['proficiency']['sc'] = floor(($this->attacker->data['proficiency']['d'] + max($this->attacker->data['proficiency']['p'], $this->attacker->data['proficiency']['k'], $this->attacker->data['proficiency']['g'], $this->attacker->data['proficiency']['c'], $this->attacker->data['proficiency']['d'])) / 2);
@@ -37,8 +37,7 @@ class combat_dtsp extends combat_bra
 			}
 		}
 		
-		//禁用掉父类的反击，在本函数重新实现反击，以解决顺序问题
-		$damage += parent::attack(true);
+		$damage += parent::attack_without_counter();
 		
 		if(!$extra && $this->defender->is_alive()){
 			foreach($this->attacker->equipment['wep']['sk'] as $key => $value){
@@ -191,25 +190,8 @@ class combat_dtsp extends combat_bra
 			
 		}
 		
-		if(false === $counter){
-			$c_combat = new_combat($this->defender, $this->attacker);
-			if(determine(intval($this->get_counter_rate()))){
-				$this->feedback($this->defender->name.'发起反击');
-				$c_damage = $c_combat->attack(true);
 				
-				$GLOBALS['g']->record_battle_damage($c_damage, $this->defender, $this->attacker);
 				
-				if(false === $this->attacker->is_alive()){
-					if((false === isset($this->defender->data['action']['battle'])) && (intval($this->defender->type) === GAME_PLAYER_USER)){
-						$this->defender->found_enemy($this->attacker);
-					}
-				}
-			}else{
-				$this->feedback($this->defender->name.'无法反击，逃跑了');
-				$c_combat->gain_experience();
-			}
-			$this->feedback('战斗结束');
-		}
 		
 		return $damage;
 	}
@@ -222,7 +204,7 @@ class combat_dtsp extends combat_bra
 		
 		//攻击
 		$bonus_attack = new_combat($this->attacker, $this->defender);
-		$damage = $bonus_attack->attack(true, true);
+		$damage = $bonus_attack->attack_without_counter(true);
 		
 		//换回来
 		$this->attacker->data['equipment']['wep'] = $current_weapon;
@@ -723,48 +705,6 @@ class combat_dtsp extends combat_bra
 		}
 	}
 	
-//	protected function modulus_defend()//为了改起来方便，直接重载了引擎combat类的同名方法
-//	{
-//		global $modulus_defend;
-//		
-//		$def = $this->defender->def;
-//		
-//		if(isset($modulus_defend['weather'])){
-//			global $gameinfo;
-//			if(isset($modulus_defend['weather'][intval($gameinfo['weather'])])){
-//				$def *= $modulus_defend['weather'][intval($gameinfo['weather'])];
-//			}
-//		}
-//		
-//		if(isset($modulus_defend['area'])){
-//			if(isset($modulus_defend['area'][intval($this->defender->data['area'])])){
-//				$def *= $modulus_defend['area'][intval($this->defender->data['area'])];
-//			}
-//		}
-//		
-//		if(!$this->counter && isset($modulus_defend['pose'])){
-//			if(isset($modulus_defend['pose'][intval($this->defender->data['pose'])])){
-//				$def *= $modulus_defend['pose'][intval($this->defender->data['pose'])];
-//			}
-//			$aa = $this->counter;
-//			$this->feedback($this->defender->name.'姿态有效，迎战无效');
-//		}
-//		
-//		if($this->counter && isset($modulus_defend['tactic'])){
-//			if(isset($modulus_defend['tactic'][intval($this->defender->data['tactic'])])){
-//				$def *= $modulus_defend['tactic'][intval($this->defender->data['tactic'])];
-//			}
-//			$this->feedback($this->defender->name.'迎战有效，姿态无效');
-//		}
-//		
-//		foreach($this->defender->buff as $buff){//身体受伤防御系数下降
-//			if($buff['type'] === 'injured_body'){
-//				$def *= 0.8;
-//			}
-//		}
-//		
-//		return $def;
-//	}
 	
 }
 
