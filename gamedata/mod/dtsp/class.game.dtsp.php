@@ -327,9 +327,61 @@ class game_dtsp extends game_bra
 		return $npc;
 	}
 	
-		/**
+	/**
+	 * 游戏开始时会调用的函数
+	 * 为可变地图的储存而继承了此函数。地图数据储存在gameinfo中。
+	 *
+	 * return null
+	 */	 
+	public function game_start()
+	{
+		global $db;
+		parent::game_start();
+		
+		/*===================Map Initialization==================*/
+//		$column = file_get_contents(get_mod_path('dtsp').'/sql/maps.dtsp.sql');
+//		$db->create_table('maps', $column);
+//		unset($column);
+		$this->init_maps();
+		
+		return;
+	}
+	
+	/**
+	 * 初始化地图信息，只在开局运行一次
+	 *
+	 * return null
+	 */
+	protected function init_maps()
+	{
+		global $gameinfo, $mapinfo, $map_random_num, $map_x, $map_y;
+		
+		$maplist = $map_coordinates = array();
+		foreach($mapinfo['map_static'] as $sval){
+			$maplist[] = $sval;
+			$map_coordinates[] = $sval['c'];
+		}
+		
+		$rlist = $mapinfo['map_random'];
+		shuffle($rlist);
+		$rlist = array_slice($rlist,0,$map_random_num);
+		foreach($rlist as $rval){
+			$i = 0;
+			do{
+				$rcoor = random(0,$map_x).'-'.random(0,$map_y);
+				if($i >= 1000){throw_error('Initiating maps failed.');}
+				$i++;
+			}while(in_array($rcoor, $map_coordinates));
+			$rval['c'] = $map_coordinates[] = $rcoor;
+			$maplist[] = $rval;
+		}
+		$gameinfo['maplist'] = $maplist;
+//		return $db->batch_insert('maps', $maplist, true);
+		return;
+	}
+	
+	/**
 	 * 游戏结束时（所有结局）会调用的函数
-	 * 进行各种初始化动作，为新一局的游戏创建全新的数据库，清空缓存与推送池
 	 * 重载了引擎game类的同名方法
 	 *
 	 * param $type(int) 游戏结局

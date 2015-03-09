@@ -62,6 +62,7 @@ $buff_name = array(
 	'ageless_land' => '无寿国への約束手形',
 	'horai' => '蓬莱之药',
 	'lunar_incense' => '仙香玉兔',
+	
 	//套装
 	'kedama_suit' => '毛玉套装',
 	'reisen_suit' => '铃仙套装',
@@ -101,63 +102,30 @@ $buff_help = array(
 	'ageless_dream' => '生命持续流失，击中敌人后效果会消失',
 	'ageless_land' => '击中敌人后会消失，若到时限仍未击中敌人则会造成大量伤害',
 	'horai' => '死后原地满状态复活',
-	'lunar_incense' => '时限到之后直接死亡'
+	'lunar_incense' => '时限到之后直接死亡',
 	);
 
 //属性名字及说明
 $sk_define = array(
-	'immortal' => array(
-		'name' => '永续',
-		'help' => '允许耐久为0',
-		'disp' => false),
-	'def-buff' => array(
-		'name' => '防御提升',
-		'help' => '额外提升防御力',
-		'disp' => true),
-	'shield' => array(
-		'name' => '盾牌',
-		'help' => '有机会完全格挡敌人的攻击',
-		'disp' => true),
+	'immortal' => array( 'name' => '永续', 'help' => '允许耐久为0', 'disp' => false),
+	'def-buff' => array( 'name' => '防御提升', 'help' => '额外提升防御力', 'disp' => true),
+	'shield' => array( 'name' => '盾牌', 'help' => '有机会完全格挡敌人的攻击', 'disp' => true),
 	'anti-P' => array('name' => '防殴', 'help' => '减少殴系武器对自己的伤害', 'disp' => true),
 	'anti-K' => array('name' => '防斩', 'help' => '减少斩系武器对自己的伤害', 'disp' => true),
 	'anti-G' => array('name' => '防弹', 'help' => '减少射击武器对自己的伤害', 'disp' => true),
 	'anti-C' => array('name' => '防投', 'help' => '减少投掷武器对自己的伤害', 'disp' => true),
 	'anti-D' => array('name' => '防爆', 'help' => '减少爆炸武器对自己的伤害', 'disp' => true),
 	'anti-F' => array('name' => '防符', 'help' => '减少符卡武器对自己的伤害', 'disp' => true),
-	'suit-joker' => array(
-		'name' => '套装欺诈',
-		'help' => 'TODO',
-		'disp' => false),
-	'ammo' => array(
-		'name' => '弹匣',
-		'help' => 'TODO',
-		'disp' => false),
-	'ammo' => array(
-		'name' => '消音',
-		'help' => '攻击时不会发出声响',
-		'disp' => true),
-	'alt' => array(
-		'name' => '形态切换',
-		'help' => '可以切换武器形态',
-		'disp' => true),
-	'multiple' => array(
-		'name' => '多重攻击',
-		'help' => '一次战斗可以作出多次攻击',
-		'disp' => true),
-	'multistage' => array(
-		'name' => '多段伤害',
-		'help' => '一次攻击可以造成多次伤害',
-		'disp' => true),
-	'pugilism' => array(
-		'name' => '拳术',
-		'help' => 'TODO',
-		'disp' => false),
-	'poison' => array(
-		'name' => '带毒',
-		'help' => '攻击附带毒属性',
-		'disp' => true),
+	'suit-joker' => array('name' => '套装欺诈', 'help' => 'TODO', 'disp' => false),
+	'ammo' => array( 'name' => '弹匣', 'help' => 'TODO', 'disp' => false),
+	'ammo' => array( 'name' => '消音', 'help' => '攻击时不会发出声响', 'disp' => true),
+	'alt' => array( 'name' => '形态切换', 'help' => '可以切换武器形态', 'disp' => true),
+	'multiple' => array( 'name' => '多重攻击', 'help' => '一次战斗可以作出多次攻击', 'disp' => true),
+	'multistage' => array( 'name' => '多段伤害', 'help' => '一次攻击可以造成多次伤害', 'disp' => true),
+	'pugilism' => array( 'name' => '拳术', 'help' => 'TODO', 'disp' => false),
+	'poison' => array( 'name' => '带毒', 'help' => '攻击附带毒属性', 'disp' => true),
 	'atk-explode' => array('name' => '冲击', 'help' => '无视敌方一定比例的防御力', 'disp' => true),
-	'atk-pierce' => array('name' => '贯穿', 'help' => '有机会无视对方的防御属性', 'disp' => true),//TODO
+	'atk-pierce' => array('name' => '贯穿', 'help' => '有机会无视对方的防御属性', 'disp' => true),
 	'atk-fire' => array('name' => '火焰攻击', 'help' => '攻击附带火焰属性，可能造成敌人烧伤，但对有防护的敌人效果差', 'disp' => true),//TODO
 	'atk-shock' => array('name' => '电击', 'help' => '攻击附带电击属性，可能造成敌人麻痹，但对有防护的敌人效果差', 'disp' => true),//TODO
 	'atk-freeze' => array('name' => '冰冻攻击', 'help' => '攻击附带冰冻属性，可能造成敌人冻结，但对有防护的敌人效果差', 'disp' => true),//TODO
@@ -284,7 +252,8 @@ $deathreasoninfo = array(
 //结局
 $ending_type = array(
 	'error' => '<span class="error">游戏故障</span>',
-	'timeup' => '<span class="dieout">全灭</span>',
+	'noplayer' => '<span class="error">无人参加</span>',
+	'timeup' => '<span class="dieout">全部死亡</span>',
 	'survive' => '<span class="survive">最后幸存</span>',
 	'eliminate' => '<span class="eliminate">游戏紧急结束</span>',
 	'restart' => '<span class="restart">游戏重设</span>'
