@@ -23,12 +23,13 @@ include(get_mod_path('dtsp').'/class.item.dtsp.php');
 include(get_mod_path('dtsp').'/class.combat.dtsp.php');
 include(get_mod_path('dtsp').'/class.game.dtsp.php');
 include(get_mod_path('dtsp').'/class.command.dtsp.php');
+include(get_mod_path('dtsp').'/class.map.dtsp.php');
 
 include(ROOT_DIR.'/gamedata/settings.bra.php');
 //include(ROOT_DIR.'/gamedata/settings.thbr.php');
 include(ROOT_DIR.'/gamedata/settings.dtsp.php');
 include(get_mod_path('dtsp').'/include/inc.lang.dtsp.php');
-include(get_mod_path('dtsp').'/include/inc.maps.dtsp.php');
+//include(get_mod_path('dtsp').'/include/inc.maps.dtsp.php');
 
 //include(get_mod_path('dtsp').'/include/func.general.dtsp.php');
 

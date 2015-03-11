@@ -1,7 +1,43 @@
 <?php
 
 class game_dtsp extends game_bra
-{
+{	
+	/**
+	 * 游戏类的初始化函数
+	 * 构造函数结束后游戏会载入本地设置，载入完成后才调用此函数
+	 * 会在此做出游戏开始与结束的判定（只有全灭结局会在此做出结束判定）
+	 * 为了增加全局地图实例$m而继承此方法
+	 */
+	public function _construct()
+	{
+		global $m;
+		
+		$gameinfo = &$this->gameinfo;
+		
+		if(($gameinfo['gamestate'] & GAME_STATE_START) === 0){
+			if($gameinfo['starttime'] < time()){
+				$this->game_start();
+			}else{
+				return;
+			}
+		}
+		
+		if(!is_object($m)){$m = new map_dtsp;}
+		
+		while($gameinfo['areatime'] <= time() && ($gameinfo['gamestate'] & GAME_STATE_START)){
+			$areanum = $this->game_forbid_area();
+			if($areanum >= sizeof($m->allget())){
+				if($this->gameinfo['validnum'] == 0){
+					$this->game_end('noplayer');
+				}else{
+					$this->game_end('timeup');
+				}
+			}
+		}
+		
+		return;
+	}
+	
 	//为实现玩家激活时写入ip信息，重载了此函数
 	public function enter_game()
 	{
@@ -128,20 +164,20 @@ class game_dtsp extends game_bra
 		return $message;
 	}
 	
+	/**
+	 * 生成禁区顺序
+	 * 为修改地图机制而重载此函数
+	 *
+	 * return array 禁区顺序
+	 */
 	protected function generate_forbidden_sequence()
 	{
-		$arealist = parent::generate_forbidden_sequence();
-		
-		//香霖堂不会一禁
-		for($i = 0; $i <= $GLOBALS['round_area']; $i++){
-			if($arealist[$i] == 14){
-				$temp = $arealist[$i];
-				$arealist[$i] = $arealist[$GLOBALS['round_area'] + 1];
-				$arealist[$GLOBALS['round_area'] + 1] = $temp;
-				break;
-			}
-		}
-		
+		global $m;
+		$arealist = $m->allget(true);
+		shuffle($arealist);
+		$arealist[array_search(0,$arealist)] = $arealist[0];
+		$arealist[0] = 0;
+		$arealist = array_values($arealist);
 		return $arealist;
 	}
 	
@@ -187,11 +223,12 @@ class game_dtsp extends game_bra
 	{
 		$return = game::game_forbid_area(); //不调用BRA的禁区（BRA实现了禁区死亡），直接调用BRN的禁区，然后重新实现禁区死亡
 		
-		global $db, $map;
+		global $db, $m;
 		$forbidden = $this->gameinfo['forbiddenlist'];
 		$safe = array();
 		$all = array();
-		for($i = 0; $i < sizeof($map); $i ++){
+		foreach($m->allget() as $mval){
+			$i = $mval['id'];
 			if(false === in_array($i, $forbidden)){
 				$safe[] = $i;
 			}
@@ -335,14 +372,15 @@ class game_dtsp extends game_bra
 	 */	 
 	public function game_start()
 	{
-		global $db;
+		global $db, $m;
+		$this->init_maps();
+		$m = new map_dtsp;
 		parent::game_start();
-		
+
 		/*===================Map Initialization==================*/
 //		$column = file_get_contents(get_mod_path('dtsp').'/sql/maps.dtsp.sql');
 //		$db->create_table('maps', $column);
-//		unset($column);
-		$this->init_maps();
+//		unset($column);		
 		
 		return;
 	}
@@ -354,7 +392,8 @@ class game_dtsp extends game_bra
 	 */
 	protected function init_maps()
 	{
-		global $gameinfo, $mapinfo, $map_random_num, $map_x, $map_y;
+		global $g;
+		include(get_mod_path('dtsp').'/init/init.maps.dtsp.php');
 		
 		$maplist = $map_coordinates = array();
 		foreach($mapinfo['map_static'] as $sval){
@@ -368,18 +407,87 @@ class game_dtsp extends game_bra
 		foreach($rlist as $rval){
 			$i = 0;
 			do{
-				$rcoor = random(0,$map_x).'-'.random(0,$map_y);
+				$rcoor = random(0,$map_size[0]).'-'.random(0,$map_size[1]);
 				if($i >= 1000){throw_error('Initiating maps failed.');}
 				$i++;
 			}while(in_array($rcoor, $map_coordinates));
 			$rval['c'] = $map_coordinates[] = $rcoor;
 			$maplist[] = $rval;
 		}
-		$gameinfo['maplist'] = $maplist;
+		$g->gameinfo['maplist'] = $maplist;
 //		return $db->batch_insert('maps', $maplist, true);
 		return;
 	}
 	
+	/**
+	 * 添加N禁时新增的地图物品
+	 * 因为重写地图逻辑而重载此方法
+	 *
+	 * param $round(int) 禁区次数（开局是0）
+	 * return null
+	 */
+	protected function update_mapitem($round)
+	{
+		global $db, $m;
+
+		$fp = fopen(get_mod_path(MOD_NAME).'/init/mapitem.php', 'r');
+		if(!$fp){
+			throw_error('Failed to open data file.');
+		}
+		$alllist = $m->allget(true);//TODO:编号为0的区域应该排除
+		
+		$data = array();
+		while(!feof($fp)){
+			$line = fgets($fp, 4096);
+			
+			if(!$line || substr($line, 0, 2) == '//' || substr($line, 0, 1) == '#' || substr($line, 0, 1) == ';'){
+				continue;
+			}
+			
+			//$item = explode(',', $line);
+			//array_pop($item);
+			
+			//由于子属性（json）中可能含有逗号，因此不能使用explode
+			$item = array();
+			$offset = 0;
+			$next_offset = 0;
+			for($index = 0; $index < 7; $index++){
+				$next_offset = strpos($line, ',', $offset);
+				if(false === $next_offset){
+					continue 2;
+				}
+				array_push($item, substr($line, $offset, $next_offset - $offset));
+				$offset = $next_offset + 1;
+			}
+			array_push($item, substr($line, $offset, strrpos($line, ',') - $offset));
+			
+			if(!$item){
+				continue;
+			}
+			
+			if(intval($item[0]) !== intval($round) && $item[0] != 99){
+				continue;
+			}
+			
+			for($i = 0; $i < $item[2]; $i++){
+				$item[1] = intval($item[1]);
+				if(in_array($item[1], $alllist) || intval($item[1]) == 99){//游戏中已有的地点才刷新物品
+					$itemdata = array(
+						'area' => $item[1] == 99 ? $alllist[array_rand($alllist)] : $item[1],
+						'itm' => $item[3],
+						'itmk' => $item[4],
+						'itme' => intval($item[5]),
+						'itms' => intval($item[6]),
+						'itmsk' => isset($item[7]) ? $item[7] : ''
+						);
+					$this->convert_item($itemdata);
+					$data[] = $itemdata;
+				}				
+			}
+		}
+		
+		return $db->batch_insert('items', $data, true);
+	}
 	/**
 	 * 游戏结束时（所有结局）会调用的函数
 	 * 重载了引擎game类的同名方法

@@ -335,13 +335,13 @@ class item_dtsp extends item_bra
 		}
 		
 		if(determine(in_array('Hacker', $this->player->skill) ? 95 :50)){
-			global $map;
+			global $m;
 			$all_map = array();
 			$target_map = array();
-			foreach($map as $mid => $map_name){
-				$all_map[] = $mid;
-				if($mid !== 0){
-					$target_map[] = $mid;
+			foreach($m->allget() as $mval){
+				$all_map[] = $mval['id'];
+				if($mval['id'] !== 1){
+					$target_map[] = $mval['id'];
 				}
 			}
 			

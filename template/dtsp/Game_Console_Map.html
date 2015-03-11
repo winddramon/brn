@@ -1,0 +1,25 @@
+<div id="F-console-map">
+	<img src="<?php echo $GLOBALS['map_image_url']; ?>">
+	<div id="F-console-map-table">
+		<?php
+		include_once(get_mod_path(MOD_NAME).'/init/init.maps.dtsp.php');//读取地图长宽等
+		?><table><?php
+		for($y = 0; $y <= $map_size[1]; $y ++){
+			?><tr><?php
+			for($x = 0; $x <= $map_size[0]; $x ++){
+				?><td class="map_block" mid=<?php
+				$coor = strval($x).'-'.strval($y);
+				if($GLOBALS['m']->cget($coor)){
+					echo $GLOBALS['m']->cget($coor, 'id');
+					echo '>'.$GLOBALS['m']->cget($coor, 'n');
+				}else{
+					echo '-1>';
+				}
+				?></td><?php
+			}
+			?></tr><?php
+		}
+	?></table>
+	<div class="mask"><div class="text">点击地图任意位置以继续...</div></div>
+	</div>
+</div>

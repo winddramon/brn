@@ -759,6 +759,24 @@ class combat_dtsp extends combat_bra
 		
 		return $def;
 	}
+	
+	protected function make_noise()
+	{
+		if(isset($this->attacker->data['equipment']['wep']['sk']['silent'])){
+			return;
+		}
+		global $a, $m;
+		switch($this->kind){
+			case 'g':
+				$a->action('notice', array('msg' => $m->iget($this->attacker->area).'传来了枪声'), array('$exception' => array($this->attacker->uid, $this->defender->uid)));
+				break;
+			
+			case 'd':
+				$a->action('notice', array('msg' => $m->iget($this->attacker->area).'传来了爆炸声'), array('$exception' => array($this->attacker->uid, $this->defender->uid)));
+				break;
+		}
+		return;
+	}
 }
 
 ?>

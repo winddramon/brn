@@ -3,10 +3,67 @@
 class player_dtsp extends player_bra
 {
 	
+	/**
+	 * 移动
+	 * 如果目的地相同会自动转换为探索
+	 * 为修改地图判断而重载此函数
+	 *
+	 * param $destination(int) 目的地的地图编号
+	 * return null
+	 */
 	public function move($destination)
 	{
-		player::move($destination); //BRA中的特殊天气取消
+		if(false === $this->is_alive()){
+			return $this->error('你已经死了');
+		}
+		
+		global $m, $shopmap;
+		$data = &$this->data;
+		$destination = intval($destination);
+		
+		if($data['action'] && isset($data['action']['battle'])){
+			$this->error('战斗中，无法移动');
+		}
+		
+		if(isset($this->package[0])){
+			$this->error('请在移动前先决定如何处理拾取到的物品');
+		}
+		
+		if(intval($data['area']) === $destination){
+			//已经在目的地
+			$this->search();
+		}else{
+			
+			if(!$m->iget($destination)){
+				$this->error('无效的目的地');
+			}
+			$mapname = $m->iget($destination);
+			
+			$status = $this->area_status($destination);
+			
+			if($status === false){
+				$this->error($mapname.' 为禁区，禁止进入');
+			}
+			
+			//消耗
+			$consumption = $this->get_consumption('move');
+			
+			$this->check_health($consumption, 'move');
+			
+			//开始移动
+			$data['area'] = $destination;
+			$this->feedback('移动到了 '.$mapname);
+			$this->ajax('location', array('name' => $mapname, 'shop' => in_array(intval($data['area']), $shopmap, true)));
+			
+			$this->discover('move');
+			
+			$hr = $this->get_heal_rate();
+			$this->ajax('heal_speed', array('hpps' => $hr['hp'], 'spps' => $hr['sp']));
+		}
+		
+		return;
 	}
+	
 	
 	protected function get_consumption($action)
 	{
