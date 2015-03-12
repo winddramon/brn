@@ -22,28 +22,34 @@ class map_dtsp		//把gameinfo的动态地图数据和init.maps.php里的静态�
 	}
 	
 	public function reload(){
-		global $g;
-		include(get_mod_path('dtsp').'/init/init.maps.dtsp.php');
+		global $g, $mapinfo, $map_active_vars, $map_random_num, $map_size;
 		
 		$maplist = $map_coordinates = array();
-		foreach($mapinfo['map_static'] as $sval){
-			$maplist[] = $sval;
-			$map_coordinates[] = $sval['c'];
+		foreach($mapinfo as $mtype => $mcont){
+			if($map_random_num[$mtype] < 0){//先把全部固定地图标注完毕
+				foreach($mcont as $mval){
+					$map_coordinates[] = $mval['c'];
+					$maplist[] = $mval;
+				}
+			}			
 		}
-		
-		$rlist = $mapinfo['map_random'];
-		shuffle($rlist);
-		$rlist = array_slice($rlist,0,2);
-		foreach($rlist as $rval){
-			$i = 0;
-			do{
-				$rcoor = random(0,$map_size[0]).'-'.random(0,$map_size[1]);
-				if($i >= 1000){throw_error('Initiating maps failed.');}
-				$i++;
-			}while(in_array($rcoor, $map_coordinates));
-			$rval['c'] = $map_coordinates[] = $rcoor;
-			$maplist[] = $rval;
+		foreach($mapinfo as $mtype => $mcont){
+			if($map_random_num[$mtype] > 0){//之后分配随机地图。这个参数是0的地图完全不放置
+				shuffle($mcont);
+				$mcont = array_slice($mcont,0,$map_random_num[$mtype]);
+				foreach($mcont as $mval){
+					$i = 0;
+					do{
+						$mcoor = random(0,$map_size[0]).'-'.random(0,$map_size[1]);
+						if($i >= 1000){throw_error('Initiating maps failed.');}
+						$i++;
+					}while(in_array($mcoor, $map_coordinates));
+					$mval['c'] = $map_coordinates[] = $mcoor;
+					$maplist[] = $mval;
+				}
+			}			
 		}
+		//file_put_contents('a.txt',$map_active_vars);
 		$this->init($maplist);
 		$this->update();
 		

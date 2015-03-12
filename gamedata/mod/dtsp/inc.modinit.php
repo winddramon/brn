@@ -28,8 +28,8 @@ include(get_mod_path('dtsp').'/class.map.dtsp.php');
 include(ROOT_DIR.'/gamedata/settings.bra.php');
 //include(ROOT_DIR.'/gamedata/settings.thbr.php');
 include(ROOT_DIR.'/gamedata/settings.dtsp.php');
-include(get_mod_path('dtsp').'/include/inc.lang.dtsp.php');
-//include(get_mod_path('dtsp').'/include/inc.maps.dtsp.php');
+include(get_mod_path('dtsp').'/include/settings.lang.dtsp.php');
+include(get_mod_path('dtsp').'/include/settings.maps.dtsp.php');
 
 //include(get_mod_path('dtsp').'/include/func.general.dtsp.php');
 

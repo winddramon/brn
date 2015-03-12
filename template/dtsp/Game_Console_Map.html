@@ -2,7 +2,7 @@
 	<img src="<?php echo $GLOBALS['map_image_url']; ?>">
 	<div id="F-console-map-table">
 		<?php
-		include_once(get_mod_path(MOD_NAME).'/init/init.maps.dtsp.php');//读取地图长宽等
+		global $map_size;//读取地图长宽等
 		
 		for($y = 0; $y <= $map_size[1]; $y ++){
 			?><div class="map_row"><?php
