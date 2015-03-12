@@ -304,13 +304,13 @@ function respond(data){
 				break;
 			
 			case 'area_info':
-				$("#F-console-map .map_block[mid]").removeClass("forbidden");
-				$("#F-console-map .map_block[mid]").removeClass("dangerous");
+				$("#F-console-map .map_block[mid] div").removeClass("forbidden");
+				$("#F-console-map .map_block[mid] div").removeClass("dangerous");
 				for(var areaid in param['dangerous']){
-					$("#F-console-map .map_block[mid='"+param['dangerous'][areaid]+"']").addClass("dangerous");
+					$("#F-console-map .map_block[mid='"+param['dangerous'][areaid]+"'] div").addClass("dangerous");
 				}
 				for(var areaid in param['forbidden']){
-					$("#F-console-map .map_block[mid='"+param['forbidden'][areaid]+"']").addClass("forbidden");
+					$("#F-console-map .map_block[mid='"+param['forbidden'][areaid]+"'] div").addClass("forbidden");
 				}
 				break;
 				
@@ -482,4 +482,161 @@ function respond(data){
 		$("#footer .performance .frame[fid='0']").html(result1);
 		$("#footer .performance .frame[fid='1']").html(result2);
 	}
+}
+
+function init_gameUI(){
+	comet_connect();
+	switch_frame('game');
+	UIvar = {'wound_dressing' : []};
+	UIconfig = { mhp : 0 , msp : 0 , hp : 0 , sp : 0 , hpps : 0 , spps : 0 , cexp : 0 , texp : 0 , capacity : 0 };
+	
+	$("#nav-title").click(function(){
+		$("#F-console-feedback .feedback").slideUp(200, function(){
+			$(this).remove();
+		});
+		$("#F-console-feedback .error").slideUp(200, function(){
+			$(this).remove();
+		});
+	});
+	
+	UIvar['shop_visible'] = false;
+	UIvar['alive'] = true;
+	UIvar['disable_drop'] = false;
+	UIvar['buff_name'] = {};
+	UIvar['buff_help'] = {};
+	
+	$("#F-console-shop .submit").click(function(e){
+		cart = {};
+		$("#F-console-shop .goods .controller input").each(function(){
+			if($(this).val() > 0){
+				cart[$(this).parent().parent().attr('iid')] = $(this).val();
+				$(this).val(0);
+				update_price();
+			}
+		});
+		request('buy', {cart: cart});
+	});
+	
+	$("#F-console-shop .back").click(function(e){
+		$("#F-console-center .wrapper[content='shop']").fadeOut(400);
+	});
+	
+	$("#F-console-shop .counter div").click(function(e){
+		request('get_goods', {kind : $(this).attr("cid")});
+	});
+	
+	//Panel
+	panel_block("package");
+	
+	$("#F-console-panel .title[target]").click(function(e){
+		panel_block($(e.target).attr("target"));
+	});
+	
+	UIvar["panel_action"] = {};
+	
+	panel_selector_default("equipment");
+	panel_selector_default("package");
+	
+	$("#F-console-panel .selector").click(function(e){
+		panel_selector(e.target);
+	});
+	
+	$("#F-console-panel .item_panel .submit").click(submit_item);
+	
+	$("#F-console-panel .tactic_panel .tactic").click(function(e){
+		action = $(this).parent().attr("acceptor");
+		tid = $(this).attr("tid");
+		request(action, {tid : tid});
+	});
+	
+	$("#F-console-panel-shop").click(function(e){
+		request('get_goods', {kind : 0});
+		$("#F-console-center .wrapper[content='shop']").fadeIn(400);
+	});
+	
+	$("#F-console-panel-wound_dressing").click(function(e){
+		show_wound_dressing();
+	});
+	
+	//Collecting
+	$("#F-console-collecting button[action='collect']").click(collect_item);
+	$("#F-console-collecting button[action='drop']").click(drop_collecting_item);
+	$("#F-console-collecting button[action='merge']").click(submit_item);
+	
+	//Team
+	$("#F-console-teaminfo button").click(function(e){
+		action = $(this).attr("action");
+		switch(action){
+			case 'create':
+			case 'join':
+				name = $("#F-console-teamname").val();
+				pass = $("#F-console-teampass").val();
+				request(action+'_team', {name: name, pass: pass});
+				break;
+			
+			case 'leave':
+				request('leave_team');
+				break;
+		}
+	});
+	
+	//Chat
+	UIvar['chat_visible'] = true;
+	UIvar['chat_num'] = 0;
+	
+	$("#F-console-chat-dialog").css("width", 350);
+	$("#F-console-chat-speak").click(function(){
+		$("#F-console-chat-speak").fadeOut(400);
+		$("#F-console-chat-form").fadeIn(400, function(){
+			$("#F-console-chat-input").focus();
+		});
+		$("#F-console-chat-dialog").css("width", "");
+		$("#F-console-chat-dialog").css("right", 300);
+	});
+	
+	$("#F-console-chat-input").blur(function(){
+		$("#F-console-chat-speak").fadeIn(400);
+		$("#F-console-chat-form").fadeOut(400, function(){
+			$("#F-console-chat-dialog").css("width", 350);
+			$("#F-console-chat-dialog").css("right", "");
+		});
+	});
+	
+	$("#F-console-chat-form").submit(function(e){
+		e.preventDefault();
+		chat_content = $("#F-console-chat-input").val();
+		$("#F-console-chat-input").val("");
+		request("chat_send", { content : chat_content });
+	});
+	
+	$("#F-console-chat-toggle-button").click(function(){
+		if(UIvar['chat_visible'] == true){
+			$("#F-console-chat-display").fadeOut();
+			$("#F-console-chat-toggle-button").html("+");
+			UIvar['chat_visible'] = false;
+		}else{
+			$("#F-console-chat-display").fadeIn();
+			$("#F-console-chat-toggle-button").html("-");
+			UIvar['chat_visible'] = true;
+		}
+	});
+	
+	//Map
+	$("#F-console-map-table .map_block div").click(function(e){
+		mid = $(e.target.parentNode).attr("mid");
+		if(mid != "-1"){
+			request("move", { destination : mid });
+		}
+	});
+	
+	$("#F-console-map-table .mask").click(function(e){
+		$("#F-console-map-table .mask").hide();
+		$("#F-console-map-table .radar").removeClass("radar");
+		$("#F-console-map-table .map_block").each(function(e){
+			$(this).html($(this).attr("name"));
+			$(this).removeAttr("name");
+		});
+	});
+	
+	setInterval("daemon()", 1000);
 }

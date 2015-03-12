@@ -3,23 +3,27 @@
 	<div id="F-console-map-table">
 		<?php
 		include_once(get_mod_path(MOD_NAME).'/init/init.maps.dtsp.php');//读取地图长宽等
-		?><table><?php
+		
 		for($y = 0; $y <= $map_size[1]; $y ++){
-			?><tr><?php
+			?><div class="map_row"><?php
 			for($x = 0; $x <= $map_size[0]; $x ++){
-				?><td class="map_block" mid=<?php
+				?><div class="map_block" mid=<?php
 				$coor = strval($x).'-'.strval($y);
 				if($GLOBALS['m']->cget($coor)){
-					echo $GLOBALS['m']->cget($coor, 'id');
-					echo '>'.$GLOBALS['m']->cget($coor, 'n');
+					$id = $GLOBALS['m']->cget($coor, 'id');
+					$name = $GLOBALS['m']->cget($coor, 'n');
+					echo $id;
+					?>><div><?php
+					echo $name;
+					?></div><?php
 				}else{
-					echo '-1>';
+					echo '-1><div> </div>';
 				}
-				?></td><?php
+				?></div><?php
 			}
-			?></tr><?php
+			?></div><?php
 		}
-	?></table>
+	?>
 	<div class="mask"><div class="text">点击地图任意位置以继续...</div></div>
 	</div>
 </div>

@@ -13,6 +13,7 @@ class game_dtsp extends game_bra
 		global $m;
 		
 		$gameinfo = &$this->gameinfo;
+		$m = new map_dtsp;
 		
 		if(($gameinfo['gamestate'] & GAME_STATE_START) === 0){
 			if($gameinfo['starttime'] < time()){
@@ -21,8 +22,6 @@ class game_dtsp extends game_bra
 				return;
 			}
 		}
-		
-		if(!is_object($m)){$m = new map_dtsp;}
 		
 		while($gameinfo['areatime'] <= time() && ($gameinfo['gamestate'] & GAME_STATE_START)){
 			$areanum = $this->game_forbid_area();
@@ -373,8 +372,7 @@ class game_dtsp extends game_bra
 	public function game_start()
 	{
 		global $db, $m;
-		$this->init_maps();
-		$m = new map_dtsp;
+		$m->reload();		
 		parent::game_start();
 
 		/*===================Map Initialization==================*/
@@ -385,39 +383,7 @@ class game_dtsp extends game_bra
 		return;
 	}
 	
-	/**
-	 * 初始化地图信息，只在开局运行一次
-	 *
-	 * return null
-	 */
-	protected function init_maps()
-	{
-		global $g;
-		include(get_mod_path('dtsp').'/init/init.maps.dtsp.php');
-		
-		$maplist = $map_coordinates = array();
-		foreach($mapinfo['map_static'] as $sval){
-			$maplist[] = $sval;
-			$map_coordinates[] = $sval['c'];
-		}
-		
-		$rlist = $mapinfo['map_random'];
-		shuffle($rlist);
-		$rlist = array_slice($rlist,0,$map_random_num);
-		foreach($rlist as $rval){
-			$i = 0;
-			do{
-				$rcoor = random(0,$map_size[0]).'-'.random(0,$map_size[1]);
-				if($i >= 1000){throw_error('Initiating maps failed.');}
-				$i++;
-			}while(in_array($rcoor, $map_coordinates));
-			$rval['c'] = $map_coordinates[] = $rcoor;
-			$maplist[] = $rval;
-		}
-		$g->gameinfo['maplist'] = $maplist;
-//		return $db->batch_insert('maps', $maplist, true);
-		return;
-	}
+
 	
 	/**
 	 * 添加N禁时新增的地图物品

@@ -1,7 +1,7 @@
 <?php
 
-$map_random_num = 3;
-$map_size = array(4, 4);//下限是0
+$map_random_num = 2;
+$map_size = array(3, 3);//下限是0
 
 $mapinfo = array(
 	'map_static' => array(

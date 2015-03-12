@@ -311,6 +311,19 @@ body{
 
 #F-console-map-table{
 	position: absolute;
+	width: 490px;
+	height: 490px;
+	display: flex;
+	flex-direction: column;
+	justify-content:center;
+}
+
+#F-console-map-table .map_row{
+	display: flex;
+	flex-grow:1;
+	flex-direction: row;
+	justify-content:center;
+	height:300px;
 }
 
 #F-console-map-table table{
@@ -341,14 +354,42 @@ body{
 }
 
 #F-console-map .map_block{
-	padding: 0;
-	width: 49px;
-	height: 49px;
+	display: flex;
+	flex-grow:1;
+	flex-direction: column;
+	justify-content:center;
+	width:300px;
 	font: bold 13px sans-serif;
 	text-align: center;
 	vertical-align: middle;
+	padding:0;
 	color: #3e3;
 	text-shadow: 1px 1px #333;
+}
+
+#F-console-map .map_block div{
+	display: flex;
+	flex-grow:1;
+	flex-direction: column;
+	justify-content:center;
+}
+
+#F-console-map .map_block div:hover{
+	background: rgba(0, 255, 0, 0.5);
+}
+
+#F-console-map .map_block div.forbidden:hover{
+	background: rgba(255, 0, 0, 0.5);
+}
+
+#F-console-map .map_block[mid="-1"] div:hover{
+	background: rgba(255, 0, 0, 0.5);
+}
+
+#F-console-map .map_block div.radar{
+	background: rgba(16, 48, 16, 0.8);
+	color: #090;
+	font-weight: bold;
 }
 
 #F-console-map .dangerous{
