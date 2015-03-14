@@ -4,7 +4,7 @@ class command_dtsp extends command_bra
 {
 	public function action_handler($action, $param)
 	{
-		global $a, $g, $cuser;
+		global $a, $g, $cuser, $m;
 		$cplayer = $this->player;
 		
 		//如果用户没有激活弹出激活界面
@@ -18,9 +18,50 @@ class command_dtsp extends command_bra
 		}
 		
 		switch($action){
-			case 'init':
+			
+						case 'init':
+				$a->action('init', false, false, true); //初始化动作拥有最高优先级
+				$a->action('game_settings', array('poison_damage' => $GLOBALS['poison']['damage'], 'poison_recover' => $GLOBALS['poison']['recover']));
+				$a->action('name', array('name' => $cplayer->name));
+				$a->action('avatar', array('src' => $cplayer->icon));
+				$a->action('number', array('number' => strval($cplayer->number).' 号'));
+				$a->action('gender', array('gender' => $GLOBALS['genderinfo'][$cplayer->gender]));
+				$a->action('max_health', array('mhp' => $cplayer->mhp, 'msp' => $cplayer->msp));
+				$a->action('health', array('hp' => $cplayer->hp, 'sp' => $cplayer->sp));
+				$hr = $cplayer->get_heal_rate();
+				$a->action('heal_speed', array('hpps' => $hr['hp'], 'spps' => $hr['sp']));
+				$a->action('pose', array('tid' => $cplayer->pose));
+				$a->action('tactic', array('tid' => $cplayer->tactic));
+				$a->action('club', array('name' => $GLOBALS['clubinfo'][$cplayer->club]));
+				$a->action('team', $cplayer->get_team_info());
+				$a->action('battle_data', array('att' => $cplayer->att, 'def' => $cplayer->def));
+				$a->action('proficiency', array('proficiency' => $cplayer->proficiency));
+				$a->action('money', array('money' => $cplayer->money));
+				$a->action('area_info', $GLOBALS['g']->get_areainfo());
+				$a->action('location', array('name' => $m->iget($cplayer->area), 'shop' => in_array(intval($cplayer->area), $GLOBALS['shopmap'], true)));
+				$a->action('weather', array('name' => $GLOBALS['weatherinfo'][$GLOBALS['gameinfo']['weather']]));
+				$a->action('item', array('equipment' => $cplayer->parse_equipment(), 'package' => $cplayer->parse_package(), 'capacity' => intval($cplayer->capacity)));
+				$a->action('buff_name', $GLOBALS['buff_name']);
+				$a->action('buff', array('buff' => $cplayer->parse_buff()));
+				$a->action('exp', array('current' => $cplayer->exp, 'target' => $cplayer->upexp, 'level' => $cplayer->lvl));
+				$a->action('currency', array('name' => $GLOBALS['currency']));
 				$a->action('rage', array('rage' => $this->player->rage));
-				parent::action_handler($action, $param);
+				
+				if(isset($cplayer->action['battle'])){
+					//战斗状态中
+					$enemy = get_player(array('_id' => $cplayer->action['battle']['pid']));
+					$enemy = new_player($enemy[0]);
+					$a->action('battle', array(
+						'enemy' => $cplayer->get_enemy_info($enemy),
+						'end' => false
+						));
+				}
+				
+				if(false === $cplayer->is_alive()){
+					//已死亡
+					$cplayer->show_death_info();
+				}
+				
 				break;
 				
 			case 'pose':

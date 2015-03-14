@@ -246,7 +246,7 @@ class game_dtsp extends game_bra
 							if($buff['param']['quantity'] >= 3){
 								$player->notice('八云紫的力量让你躲避了禁区死亡');
 								$player->data['area'] = $safe[array_rand($safe)];
-								$player->ajax('location', array('name' => $GLOBALS['map'][$player->data['area']], 'shop' => in_array(intval($player->data['area']), $GLOBALS['shopmap'], true)));
+								$player->ajax('location', array('name' => $m->iget($player->data['area']), 'shop' => in_array(intval($player->data['area']), $GLOBALS['shopmap'], true)));
 								continue 2; //自动躲避禁区
 							}
 							
@@ -255,7 +255,7 @@ class game_dtsp extends game_bra
 							if($buff['param']['quantity'] >= 3){
 								$player->notice('毛玉的力量让你躲避了禁区死亡');
 								$player->data['area'] = $safe[array_rand($safe)];
-								$player->ajax('location', array('name' => $GLOBALS['map'][$player->data['area']], 'shop' => in_array(intval($player->data['area']), $GLOBALS['shopmap'], true)));
+								$player->ajax('location', array('name' => $m->iget($player->data['area']), 'shop' => in_array(intval($player->data['area']), $GLOBALS['shopmap'], true)));
 								continue 2; //自动躲避禁区
 							}
 						

@@ -99,6 +99,12 @@ class item_dtsp extends item_bra
 			return;
 		}
 		
+		if($this->data['k'] === 'YR'){
+			$this->apply_region_move();
+			$this->consume();
+			return;
+		}
+		
 		$success = true;
 		switch($this->data['n']){
 			
@@ -251,6 +257,36 @@ class item_dtsp extends item_bra
 			$this->consume();
 		}
 		
+		return;
+	}
+	
+	protected function apply_region_move()
+	{
+		global $m, $map_region_access, $shopmap;
+		if(!isset($this->data['sk']['region'])){
+			$this->player->error('跨区移动参数错误1');
+			return;
+		}
+		$region = $this->data['sk']['region'];
+		$destination = $map_region_access[$region];
+		if(!$destination || ($destination >= 0 && !$m->iget($destination))){
+			$this->player->error('跨区移动参数错误2');
+			return;
+		}
+		if($destination < 0){//该等级随机
+			$dlist = array();
+			foreach($m->allget() as $dval){
+				if($dval['r'] == $region){
+					$dlist[] = $dval;
+				}
+			}
+			shuffle($dlist);
+			$destination = $dlist[0]['id'];
+		}
+		$this->player->area = $destination;
+		$mapname = $m->iget($destination);
+		$this->player->feedback('借助'.$this->data['n'].'，移动到了'.$mapname.'。');
+		$this->player->ajax('location', array('name' => $mapname, 'shop' => in_array(intval($this->player->area), $shopmap, true)));
 		return;
 	}
 	

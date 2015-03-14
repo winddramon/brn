@@ -34,11 +34,13 @@ class player_dtsp extends player_bra
 			$this->search();
 		}else{
 			
-			if(!$m->iget($destination)){
+			$mapname = $m->iget($destination);
+			if(!$mapname){
 				$this->error('无效的目的地');
 			}
-			$mapname = $m->iget($destination);
-			
+			if($m->iget(intval($data['area']), 'r') !== $m->iget($destination, 'r')){
+				$this->error('无法跨区移动');
+			}
 			$status = $this->area_status($destination);
 			
 			if($status === false){
