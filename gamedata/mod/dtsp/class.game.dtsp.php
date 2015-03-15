@@ -284,6 +284,39 @@ class game_dtsp extends game_bra
 		
 		$content = '';
 		switch($type){
+			case 'end_info':
+				switch($args['type']){
+					case 'survive':
+						$player_data = $this->get_player_by_id($args['winner'][0]);
+						$winner = new_player($player_data);
+						$content = '<span class="system">'.$winner->name.' 在游戏中最后幸存，游戏结束</span>';
+						break;
+						
+					case 'laststand':
+						$player_data = $this->get_player_by_id($args['winner'][0]);
+						$winner = new_player($player_data);
+						$content = '<span class="system">'.$winner->name.' 成功逃出战场，游戏结束</span>';
+						break;
+				
+					case 'noplayer':
+						$content = '<span class="system">无人参加，游戏结束</span>';
+						break;
+				
+					case 'timeup':
+						$content = '<span class="system">游戏时限已到仍未分出胜负，所有幸存者被处决</span>';
+						break;
+					
+					case 'restart':
+						$content = '<span class="system">游戏被重设</span>';
+						break;
+					
+					case 'stop':
+					default:
+						$content = '<span class="system">游戏突然停止了</span>';
+						break;
+				}
+				break;
+				
 			case 'compose':
 				$composer = '<span class="username">'.$args['composer'].'</span>';
 				$item = '<span class="weapon">'.$args['item'].'</span>';

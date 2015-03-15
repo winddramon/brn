@@ -107,7 +107,11 @@ class item_dtsp extends item_bra
 		
 		$success = true;
 		switch($this->data['n']){
-			
+			case '冻结BUFF':
+				$this->player->freeze_buff('last_stand');
+				
+				$success = false;
+				break;
 			case '御神签':
 				do{
 					$this->apply_dice();
@@ -269,10 +273,12 @@ class item_dtsp extends item_bra
 		}
 		$region = $this->data['sk']['region'];
 		$destination = $m->get_region_access($region);
-		$this->player->area = $destination;
 		$mapname = $m->iget($destination);
-		$this->player->feedback('借助'.$this->data['n'].'，移动到了'.$mapname.'。');
-		$this->player->ajax('location', array('name' => $mapname, 'shop' => in_array(intval($this->player->area), $shopmap, true)));
+		$this->player->feedback('你使用了'.$this->data['n'].'，跨越了区域的限制。');
+		$this->player->move($destination, true, true);
+//		$this->player->area = $destination;
+
+//		$this->player->ajax('location', array('name' => $mapname, 'shop' => in_array(intval($this->player->area), $shopmap, true)));
 		return;
 	}
 	

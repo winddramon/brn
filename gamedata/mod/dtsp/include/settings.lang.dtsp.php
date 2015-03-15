@@ -35,6 +35,8 @@ $hp_status = array(
 
 //buff名字
 $buff_name = array(
+	'last_stand' => '曙光将至',
+
 	'poison' => '中毒',
 	'injured_body' => '胸部受伤',
 	'injured_head' => '头部受伤',
@@ -87,6 +89,8 @@ $buff_name = array(
 	
 //buff说明
 $buff_help = array(
+	'last_stand' => '倒计时结束时将获得游戏胜利',
+
 	'poison' => '生命持续流失',
 	'injured_body' => '防御力下降，治疗速度减半，再次受伤会撕裂伤口',
 	'injured_head' => '准确率下降，再次受伤会撕裂伤口',
@@ -260,6 +264,7 @@ $ending_type = array(
 	'timeup' => '<span class="dieout">全部死亡</span>',
 	'survive' => '<span class="survive">最后幸存</span>',
 	'eliminate' => '<span class="eliminate">游戏紧急结束</span>',
+	'laststand' => '<span class="survive">逃出生天</span>',
 	'restart' => '<span class="restart">游戏重设</span>'
 	);
 

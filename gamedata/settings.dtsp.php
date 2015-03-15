@@ -27,6 +27,12 @@ $template_name = 'dtsp';
 //头像文件夹
 $avatar_dir = 'dtsp';
 
+
+$last_stand = array(
+	'win' => 300,//独存胜利的时间
+	'reset' => 180//让他人倒计时重置的时间
+);
+
 //禁区时间（秒）
 $round_time = 1800;
 

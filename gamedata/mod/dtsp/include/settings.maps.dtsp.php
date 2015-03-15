@@ -11,10 +11,12 @@ $map_random_group = array(
 		'list' => array(11,12,13,14)
 	),
 );
+$map_final_region = 3;
 $map_region_access = array(//区域入口，0或者正数为地图编号，负数为该等级随机
 	0 => 0,
 	1 => 1,
 	2 => -1,
+	3 => 3
 );
 $mapinfo = array(
 	array(
@@ -38,8 +40,8 @@ $mapinfo = array(
 	array(
 		'id' => 3,
 		'n' => '固定地图3',
-		'c' => '1-4',
-		'r' => 2
+		'c' => '4-3',
+		'r' => 3
 	),
 	array(
 		'id' => 11,

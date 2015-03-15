@@ -51,6 +51,7 @@ class map_dtsp		//把gameinfo的动态地图数据和init.maps.php里的静态�
 				$mcont = array_slice($rgval['list'],0,$rgval['num']);
 				foreach($mcont as $lval){
 					$mdata = $this->mapinfo_by_id[$lval];
+					$i = 0;
 					do{
 						$mcoor = random(0,$map_size[0]).'-'.random(0,$map_size[1]);
 						if($i >= 1000){throw_error('Initiating maps failed.');}
@@ -108,9 +109,9 @@ class map_dtsp		//把gameinfo的动态地图数据和init.maps.php里的静态�
 	public function get_region_access($region)
 	{
 		global $g, $m, $map_region_access, $shopmap;
-		$cplayer = $g->current_player();
 		$destination = $map_region_access[$region];
 		if(!$destination || ($destination >= 0 && !$m->iget($destination))){
+			$cplayer = $g->current_player();
 			$cplayer->error('跨区移动参数错误2');
 			return;
 		}

@@ -17,7 +17,7 @@ class player_dtsp extends player_bra
 			return $this->error('你已经死了');
 		}
 		
-		global $m, $shopmap;
+		global $m, $shopmap, $map_final_region, $last_stand;
 		$data = &$this->data;
 		$destination = intval($destination);
 		
@@ -43,7 +43,7 @@ class player_dtsp extends player_bra
 			}
 			$status = $this->area_status($destination);
 			
-			if($status === false){
+			if($status === false && !$across_regions){
 				$this->error($mapname.' 为禁区，禁止进入');
 			}
 			
@@ -51,6 +51,8 @@ class player_dtsp extends player_bra
 			$consumption = $this->get_consumption('move');
 			
 			$this->check_health($consumption, 'move');
+			
+			
 			
 			//开始移动
 			$data['area'] = $destination;
@@ -62,11 +64,35 @@ class player_dtsp extends player_bra
 			
 			$hr = $this->get_heal_rate();
 			$this->ajax('heal_speed', array('hpps' => $hr['hp'], 'spps' => $hr['sp']));
+			
+			//判定是否移动到最终战场
+			if($m->iget($destination, 'r') == $map_final_region){
+				$this->set_laststand();
+				//$g->check_laststand();			
+			}
 		}
 		
 		return;
 	}
 	
+	protected function set_laststand(){
+		global $last_stand;
+		$already = false;
+		foreach($this->data['buff'] as &$buff){
+			switch($buff['type']){
+				case 'last_stand':
+					$already = true;
+					break;
+					
+				default:
+					break;
+			}
+		}
+		if(!$already){
+			$this->buff('last_stand', $last_stand['win'], array('entrytime' => time(), 'duration' => $last_stand['win']));
+		}	
+		return;
+	}
 	
 	protected function get_consumption($action)
 	{
@@ -350,6 +376,19 @@ class player_dtsp extends player_bra
 		}
 	}
 	
+	public function freeze_buff($type){
+		foreach($this->data['buff'] as &$bval){
+			if($bval['type'] == $type){
+				if($bval['time'] > 0 && $bval['time'] - time() > 0){
+					$bval['duration'] = $bval['time'] - time();
+					$bval['freezetime'] = time();
+					$bval['time'] = 0;
+				}
+			}
+		}
+		return;
+	}
+	
 	public function remove_buff($key)
 	{
 		$buff = $this->data['buff'][$key];
@@ -358,6 +397,10 @@ class player_dtsp extends player_bra
 		
 		//必须放在继承函数之后，否则诸如攻击增益的效果将计算buff取消前的数值
 		switch($buff['type']){
+			case 'last_stand':
+				$GLOBALS['g']->game_end('laststand', $this->_id);
+				break;
+				
 			case 'ageless_dream':
 				$hr = $this->get_heal_rate();
 				$this->ajax('heal_speed', array('hpps' => $hr['hp'], 'spps' => $hr['sp']));
