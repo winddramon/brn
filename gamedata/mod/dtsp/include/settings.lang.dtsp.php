@@ -40,6 +40,8 @@ $buff_name = array(
 	'injured_head' => '头部受伤',
 	'injured_arm' => '腕部受伤',
 	'injured_foot' => '足部受伤',
+	'tolerance' => '药物耐受',
+	
 	'extra_package' => '背包扩容',
 	'extra_hp' => '额外生命',
 	'att_buff' => '攻击增益',
@@ -90,6 +92,8 @@ $buff_help = array(
 	'injured_head' => '准确率下降，再次受伤会撕裂伤口',
 	'injured_arm' => '攻击力下降，探索体力消耗增加，再次受伤会撕裂伤口',
 	'injured_foot' => '移动体力消耗增加，再次受伤会撕裂伤口',
+	'tolerance' => '使用回复品的效果减半',
+	
 	'shield' => '代替自身受到伤害',
 	'infrared_moon' => '无法被远程攻击及 SpellCard 击中',
 	'ultrashort_EEG' => '出现多个分身与本体共同攻击',

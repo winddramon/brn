@@ -1,9 +1,9 @@
 <?php
 class map_dtsp		//把gameinfo的动态地图数据和init.maps.php里的静态地图数据封装在一起
 {
-	public $data_by_id = array();
-	public $data_by_coordinate = array();
-	public $mapinfo_by_id = array();
+	protected $data_by_id = array();
+	protected $data_by_coordinate = array();
+	protected $mapinfo_by_id = array();
 	
 	public function __construct()
 	{
@@ -103,6 +103,29 @@ class map_dtsp		//把gameinfo的动态地图数据和init.maps.php里的静态�
 	
 	public function allget($keys = false){
 		return $keys ? array_keys($this->data_by_id) : $this->data_by_id;
+	}
+	
+	public function get_region_access($region)
+	{
+		global $g, $m, $map_region_access, $shopmap;
+		$cplayer = $g->current_player();
+		$destination = $map_region_access[$region];
+		if(!$destination || ($destination >= 0 && !$m->iget($destination))){
+			$cplayer->error('跨区移动参数错误2');
+			return;
+		}
+		if($destination < 0){//该等级随机
+			$dlist = array();
+			foreach($m->allget() as $dval){
+				if($dval['r'] == $region){
+					$dlist[] = $dval;
+				}
+			}
+			shuffle($dlist);
+			$destination = $dlist[0]['id'];
+		}
+		
+		return $destination;
 	}
 }
 ?>

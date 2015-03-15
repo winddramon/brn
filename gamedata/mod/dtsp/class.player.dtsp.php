@@ -11,7 +11,7 @@ class player_dtsp extends player_bra
 	 * param $destination(int) 目的地的地图编号
 	 * return null
 	 */
-	public function move($destination)
+	public function move($destination, $across_regions = false, $ignore_search = false)
 	{
 		if(false === $this->is_alive()){
 			return $this->error('你已经死了');
@@ -29,7 +29,7 @@ class player_dtsp extends player_bra
 			$this->error('请在移动前先决定如何处理拾取到的物品');
 		}
 		
-		if(intval($data['area']) === $destination){
+		if(intval($data['area']) === $destination && !$ignore_search){
 			//已经在目的地
 			$this->search();
 		}else{
@@ -38,7 +38,7 @@ class player_dtsp extends player_bra
 			if(!$mapname){
 				$this->error('无效的目的地');
 			}
-			if($m->iget(intval($data['area']), 'r') !== $m->iget($destination, 'r')){
+			if($m->iget(intval($data['area']), 'r') !== $m->iget($destination, 'r') && !$across_regions){
 				$this->error('无法跨区移动');
 			}
 			$status = $this->area_status($destination);
@@ -56,8 +56,9 @@ class player_dtsp extends player_bra
 			$data['area'] = $destination;
 			$this->feedback('移动到了 '.$mapname);
 			$this->ajax('location', array('name' => $mapname, 'shop' => in_array(intval($data['area']), $shopmap, true)));
-			
-			$this->discover('move');
+			if(!$ignore_search){
+				$this->discover('move');
+			}
 			
 			$hr = $this->get_heal_rate();
 			$this->ajax('heal_speed', array('hpps' => $hr['hp'], 'spps' => $hr['sp']));
@@ -218,6 +219,7 @@ class player_dtsp extends player_bra
 	{
 		switch($name){
 			//不叠加新buff而是在存在buff上增加时长
+			case 'tolerance':
 			case 'invincible':
 			case 'scarlet_moonlight':
 			case 'ultrashort_EEG':

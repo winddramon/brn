@@ -14,7 +14,7 @@ $map_random_group = array(
 $map_region_access = array(//区域入口，0或者正数为地图编号，负数为该等级随机
 	0 => 0,
 	1 => 1,
-	2 => 3,
+	2 => -1,
 );
 $mapinfo = array(
 	array(

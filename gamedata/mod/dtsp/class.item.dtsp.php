@@ -268,21 +268,7 @@ class item_dtsp extends item_bra
 			return;
 		}
 		$region = $this->data['sk']['region'];
-		$destination = $map_region_access[$region];
-		if(!$destination || ($destination >= 0 && !$m->iget($destination))){
-			$this->player->error('跨区移动参数错误2');
-			return;
-		}
-		if($destination < 0){//该等级随机
-			$dlist = array();
-			foreach($m->allget() as $dval){
-				if($dval['r'] == $region){
-					$dlist[] = $dval;
-				}
-			}
-			shuffle($dlist);
-			$destination = $dlist[0]['id'];
-		}
+		$destination = $m->get_region_access($region);
 		$this->player->area = $destination;
 		$mapname = $m->iget($destination);
 		$this->player->feedback('借助'.$this->data['n'].'，移动到了'.$mapname.'。');
@@ -721,6 +707,24 @@ class item_dtsp extends item_bra
 	
 	protected function heal($kind)
 	{
+		global $tolerance;
+		
+		$in_tolerance = false;
+		foreach($this->player->buff as &$buff){
+			switch($buff['type']){
+				//耐药性效果
+				case 'tolerance':
+					$in_tolerance = true;
+					break;
+					
+				default:
+					break;
+			}
+		}
+		if($in_tolerance){
+			$this->data['e'] *= $tolerance['modulous'];
+		}
+		
 		parent::heal($kind);
 		
 		foreach($this->player->buff as &$buff){
@@ -747,6 +751,10 @@ class item_dtsp extends item_bra
 			}
 		}
 		
+		if($in_tolerance && $this->data['s']){
+			$this->data['e'] /= $tolerance['modulous'];
+		}
+		
 		//副作用实现
 		if(isset($this->data['sk']['side-effect'])){
 			$se = &$this->data['sk']['side-effect'];
@@ -770,6 +778,13 @@ class item_dtsp extends item_bra
 					$this->player->buff('def_debuff', $duration, array('effect' => $se['def']));
 				}
 			}
+		}
+		
+		//耐药性实现
+		if($tolerance['last'] > 0){
+			$this->player->feedback('急速的回复使你的身体产生了耐药性，需要一段时间才能消除。');
+			$duration = $this->data['e'] * $tolerance['last'];
+			$this->player->buff('tolerance', $duration);
 		}
 		
 		return;
