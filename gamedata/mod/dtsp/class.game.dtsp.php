@@ -83,6 +83,13 @@ class game_dtsp extends game_bra
 		return;
 	}
 	
+	protected function new_player()
+	{
+		$player = parent::new_player();
+		$player['region'] = 1; //避免开局就无法移动
+		return $player;
+	}
+	
 	/**
 	 * 进入游戏时提交用户偏好，并更新游戏记录
 	 * 如果MOD中保存了其他用户偏好，请重载此函数
@@ -116,46 +123,11 @@ class game_dtsp extends game_bra
 		$message = '
 <p class="welcome">
 <img border="0" src="img/i_hayashida.gif" width="70" height="70"><br /><br />
-你是转校生？我是班主任林田。<br />嘿嘿，你很懂挑学校嘛！ (露出邪恶的笑容)<br />
-
-转校手续刚办完，明天就是毕业旅行。<br>
-你可真幸运，千万记着不要迟到！<br><br>
-
-张开眼睛后，发现自己在一个像教室的地方。我不是应该去了修学旅行吗···？<br>
-「对了，在去修学旅行的巴士中忽然睡意袭来···」<br>
-纵览四周，看见其他的学生好像也在。用心地看的话，发现了大家的颈上套上了银色项圈，<br>
-用手碰自己的颈，也感觉到冷冷的金属触感。<br>
-正在疑惑大家为什么都套上同样的那个银色项圈的时候...<br><br>
-突然，从前面的门，一个男人全副武装装备的军人走了进来···。<br><br>
-<img border="0" src="./img/n_1.gif" width="70" height="70"><br><br>
-「大家好，一年前的时候我也是这次计划的担当者。很荣幸能再担任此次计划的任务。很好！<br>
-随着时间日子人民越来越安于现状，过着幸福日子的时候，相信各位已经忘记了国家曾多努力多辛苦才能建成今天的社会地位，<br>
-如今国家开始衰退，想再振兴，但人们已经再没有自信，这是很危险的。因此，伟大的人们商量制定了这个计划。<br><br>
-
 <font color="#ff0000" face="verdana" size="6">
 <span id="br" style="width:100%;filter:blur(add=1,direction=135,strength=9):glow(strength=5,color=gold); font-weight:700; text-decoration:underline">
 ■ BATTLE ROYALE ■</span></font><br>
 
-今天起开始，在这里诸位要开始互相杀害对方。<br>
-如果你想取下那个项圈，尝试打算逃走的话，你将会立即被杀。<br><br>
-直到剩下一人生存为止，乖乖遵守别犯规。<br>
-哎呀，老师都忘记了说，这里是一个四面环海的荒岛。<br><br>
-而这里是这个岛的分校。<br>
-老师会一直在这里看着各位努力。<br><br>
-那么，开始说这个计划如何执行。你从这里出去后去哪里也可以。<br>
-每天8小时 (0点和8点和6点)，做全岛广播。一日三回。<br><br>
-在那里，大家会看到地图，这个区域什么时候危险老师会告知。<br>
-好好地了解地图，离开那一个区域，<br>
-要很快地从那个区域出来喔。<br><br>
-为何会这样说呢，不逃离广播危险区域的范围，那个项圈是会爆炸的。<br><br>
-因此呀，潜伏在该区域中的建筑物中也是不行。<br>
-就算挖洞隐藏无线电波也会找到你引爆喔。<br>
-对了，建筑物平常是可以让你任意隐藏的。<br><br>
-但还是你要知道。计划有时间限制。你只有<b><font color="red">一天</font></b>时间去完成。<br><br>
-时间够如果还留下不止一人，剩下的那些人的项圈一样会爆炸。因为冠军只能够存活<u>—人</u>。<br><br>
-既然参加了游戏就要全力以赴，老师可不想看到没胜利者呢！<br>
-你们每个人将被派发到一个物品包，里面有食物和水，指南针，以及一件武器。<br><br>
-下面开始，按照学号，拿好你们的东西，一个个离开这里！<br><br>
+任务目标：抵达最终战场并坚持5分钟！<br>
 <br>
 <font color="#666666">（点击任意处继续）</font>
 </p>
@@ -398,20 +370,65 @@ class game_dtsp extends game_bra
 	
 	/**
 	 * 游戏开始时会调用的函数
-	 * 为可变地图的储存而继承了此函数。地图数据储存在gameinfo中。
+	 * 为可变地图的储存而重载了此函数。地图数据储存在gameinfo中。
 	 *
 	 * return null
 	 */	 
 	public function game_start()
 	{
-		global $db, $m;
-		$m->reload();		
-		parent::game_start();
-
-		/*===================Map Initialization==================*/
-//		$column = file_get_contents(get_mod_path('dtsp').'/sql/maps.dtsp.sql');
-//		$db->create_table('maps', $column);
-//		unset($column);		
+		global $db, $c, $m, $gameinfo, $map, $round_area;
+		$round = -1;
+		$gameinfo['gamestate'] = 0;
+		
+		/*===================Maps Initialization==================*/
+		$m->reload();	
+		
+		/*==================Shops Initialization==================*/
+		$column = file_get_contents('gamedata/sql/shop.sql');
+		$db->create_table('shop', $column);
+		unset($column);
+		
+		/*==================Items Initialization==================*/
+		$column = file_get_contents('gamedata/sql/items.sql');
+		$db->create_table('items', $column);
+		unset($column);
+		
+		/*=================Players Initialization=================*/
+		$column = file_get_contents(get_mod_path('dtsp').'/sql/players.dtsp.sql');
+		$db->create_table('players', $column);
+		unset($column);
+		
+		/*===================Team Initialization==================*/
+		$column = file_get_contents('gamedata/sql/team.sql');
+		$db->create_table('team', $column);
+		unset($column);
+		
+		/*===================News Initialization==================*/
+		$column = file_get_contents('gamedata/sql/news.sql');
+		$db->create_table('news', $column);
+		unset($column);
+		
+		/*========Generate a sequence of forbidden regions========*/
+		$arealist = $this->generate_forbidden_sequence();
+		
+		/*==================Clean up comet pool===================*/
+		$c->clear_all();
+		
+		/*=====================Save Gameinfo======================*/
+		$gameinfo['gamenum'] += 1;
+		$gameinfo['round'] = $round;
+		$gameinfo['forbiddenlist'] = array();
+		$gameinfo['alivenum'] = 0;
+		$gameinfo['validnum'] = 0;
+		$gameinfo['deathnum'] = 0;
+		$gameinfo['arealist'] = $arealist;
+		$gameinfo['areatime'] = $gameinfo['starttime'];
+		$gameinfo['gamestate'] |= GAME_STATE_START;
+		$gameinfo['hdamage'] = 0;
+		$gameinfo['hplayer'] = '';
+		
+		/*======================Insert News=======================*/
+		$this->insert_news('start', $gameinfo['gamenum']);
 		
 		return;
 	}
@@ -570,6 +587,25 @@ class game_dtsp extends game_bra
 		$db->insert('history', array('gamenum' => $this->gameinfo['gamenum'], 'type' => $type, 'time' => time(), 'winners' => $winners, 'winner_info' => $winner_info, 'news' => $news));
 		
 		return $winner;
+	}
+	
+	function check_all_laststand(){
+		global $db, $g, $cplayer, $map_final_region;
+		$laststanders = $db->select('players', '_id', array('type' => GAME_PLAYER_USER, 'region' => $map_final_region));
+		if(is_array($laststanders) && sizeof($laststanders) >= 2){
+			foreach($laststanders as $lval){
+				if($lval['_id'] == $cplayer->_id){
+					$lplayer = &$cplayer;
+				}else{
+					$lp = $this->get_player_by_id($lval['_id']);
+					$lplayer = new_player($lp);
+				}
+				if($lplayer->freeze_buff('last_stand')){
+					$lplayer->feedback('由于有敌人存在，你的倒计时停止了！');
+				}				
+			}
+		}
+		return;
 	}
 }
 

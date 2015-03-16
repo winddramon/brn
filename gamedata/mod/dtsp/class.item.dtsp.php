@@ -107,8 +107,17 @@ class item_dtsp extends item_bra
 		
 		$success = true;
 		switch($this->data['n']){
-			case '冻结BUFF':
-				$this->player->freeze_buff('last_stand');
+			case 'BUFF状态切换器':
+				$bufftype = $this->data['sk'];
+				foreach($this->player->data['buff'] as &$bval){
+					if($bval['type'] == $bufftype){
+						if($bval['time'] > 0){
+							$this->player->freeze_buff($bufftype);
+						}elseif(isset($bval['param']['duration'])){
+							$this->player->unfreeze_buff($bufftype);
+						}
+					}
+				}
 				
 				$success = false;
 				break;

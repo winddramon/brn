@@ -17,7 +17,7 @@ class player_dtsp extends player_bra
 			return $this->error('你已经死了');
 		}
 		
-		global $m, $shopmap, $map_final_region, $last_stand;
+		global $g, $m, $shopmap, $map_final_region, $last_stand;
 		$data = &$this->data;
 		$destination = intval($destination);
 		
@@ -38,7 +38,8 @@ class player_dtsp extends player_bra
 			if(!$mapname){
 				$this->error('无效的目的地');
 			}
-			if($m->iget(intval($data['area']), 'r') !== $m->iget($destination, 'r') && !$across_regions){
+			$region = $m->iget($destination, 'r');
+			if($m->iget(intval($data['area']), 'r') !== $region && !$across_regions){
 				$this->error('无法跨区移动');
 			}
 			$status = $this->area_status($destination);
@@ -56,6 +57,7 @@ class player_dtsp extends player_bra
 			
 			//开始移动
 			$data['area'] = $destination;
+			$data['region'] = $region;
 			$this->feedback('移动到了 '.$mapname);
 			$this->ajax('location', array('name' => $mapname, 'shop' => in_array(intval($data['area']), $shopmap, true)));
 			if(!$ignore_search){
@@ -65,17 +67,29 @@ class player_dtsp extends player_bra
 			$hr = $this->get_heal_rate();
 			$this->ajax('heal_speed', array('hpps' => $hr['hp'], 'spps' => $hr['sp']));
 			
-			//判定是否移动到最终战场
-			if($m->iget($destination, 'r') == $map_final_region){
-				$this->set_laststand();
-				//$g->check_laststand();			
+			//最终战场特殊判定：1. 增加倒计时  2. 如果最终战场的玩家数在2以上，则暂停所有玩家的倒计时
+			if($region == $map_final_region){
+				$this->check_laststand();
+				$g->check_all_laststand();	
 			}
 		}
 		
 		return;
 	}
 	
-	protected function set_laststand(){
+	public function search()
+	{
+		global $g, $m, $map_final_region;
+		$this->region = $m->iget($this->area,'r');
+		parent::search();
+		if($this->region == $map_final_region){
+			$this->check_laststand();
+			$g->check_all_laststand();	
+		}
+		return;
+	}
+	
+	protected function check_laststand(){
 		global $last_stand;
 		$already = false;
 		foreach($this->data['buff'] as &$buff){
@@ -89,7 +103,7 @@ class player_dtsp extends player_bra
 			}
 		}
 		if(!$already){
-			$this->buff('last_stand', $last_stand['win'], array('entrytime' => time(), 'duration' => $last_stand['win']));
+			$this->buff('last_stand', $last_stand['win'], array('entrytime' => time()));
 		}	
 		return;
 	}
@@ -377,16 +391,35 @@ class player_dtsp extends player_bra
 	}
 	
 	public function freeze_buff($type){
+		$flag = false;
 		foreach($this->data['buff'] as &$bval){
 			if($bval['type'] == $type){
 				if($bval['time'] > 0 && $bval['time'] - time() > 0){
-					$bval['duration'] = $bval['time'] - time();
-					$bval['freezetime'] = time();
+					$bval['param']['duration'] = $bval['time'] - time();
+					$bval['param']['freezetime'] = time();
 					$bval['time'] = 0;
+					$this->ajax('buff', array('buff' => $this->parse_buff()));
+					$flag = true;
+					break;
 				}
 			}
 		}
-		return;
+		return $flag;
+	}
+	
+	public function unfreeze_buff($type){
+		$flag = false;
+		foreach($this->data['buff'] as &$bval){
+			if($bval['type'] == $type){
+				if($bval['time'] == 0 && isset($bval['param']['duration']) && isset($bval['param']['freezetime'])){
+					$bval['time'] = time() + $bval['param']['duration'];
+					$this->ajax('buff', array('buff' => $this->parse_buff()));
+					$flag = true;
+					break;
+				}
+			}
+		}
+		return $flag;
 	}
 	
 	public function remove_buff($key)

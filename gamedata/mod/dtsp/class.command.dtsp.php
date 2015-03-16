@@ -19,7 +19,7 @@ class command_dtsp extends command_bra
 		
 		switch($action){
 			
-						case 'init':
+			case 'init':
 				$a->action('init', false, false, true); //初始化动作拥有最高优先级
 				$a->action('game_settings', array('poison_damage' => $GLOBALS['poison']['damage'], 'poison_recover' => $GLOBALS['poison']['recover']));
 				$a->action('name', array('name' => $cplayer->name));
