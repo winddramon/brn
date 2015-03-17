@@ -37,6 +37,98 @@ class game_dtsp extends game_bra
 		return;
 	}
 	
+	/**
+	 * 游戏结束时（所有结局）会调用的函数
+	 * 进行各种初始化动作，为新一局的游戏创建全新的数据库，清空缓存与推送池
+	 * 为使下一局游戏的时间变更而重载此函数
+	 *
+	 * @param string 游戏结局
+	 * @param mixed $winner 胜利者player对象（可以是数组也可以是单个对象）
+	 * @param string $mode 胜利方式（团队或个人）
+	 * @return array 胜利玩家的id
+	 */
+	public function game_end($type = 'timeup', $winners = array(), $mode = 'team') //TODO: 发送推送消息（剧情）
+	{
+		global $gameinfo, $db, $p, $game_interval;
+		
+		if(is_array($winners) === false){
+			$winners = array($winners);
+		}
+
+		$winner_ids = array();
+		foreach($winners as $winner){
+			$winner_ids[] = $winner->_id;
+		}
+
+		//将队伍玩家全部加入胜利者名单中 TODO: 分离各函数
+		if($mode === 'team'){
+			foreach($winners as $player){
+				if($player->teamID != -1){
+					$teammates = $db->select('players', '*', array('teamID' => $player->teamID));
+					foreach($teammates as $teammate){
+						if(false === in_array($teammate['_id'], $winner_ids)){
+							$winners[] = new_player($teammate);
+						}
+					}
+				}
+			}
+		}
+
+		$team_names = array();
+		//获取队伍名字
+		foreach($winners as $player){
+			if($player->teamID == -1){
+				$team_names[$player->_id] = '无队伍';
+			}else{
+				$team = $db->select('team', array('name'), array('_id' => $player['teamID']));
+				if($team){
+					$team_names[$player->_id] = $team[0]['name'];
+				}else{
+					$team_names[$player->_id] = '无队伍'; //存储异常
+				}
+			}
+		}
+		
+		//生成简略信息
+		$winner_info = array();
+		foreach($winners as &$player){ //此处不用引用会将所有胜利者都变成下标为0的玩家
+			$winner_info[] = array(
+				'name' => ($player->teamID == -1 ? '' : '['.$team_names[$player->_id].']').$player->name,
+				'icon' => $player->icon,
+				'motto' => $player->motto
+				);
+		}
+		
+		//生成上局胜利玩家
+		$winner_name = array();
+		foreach($winner_info as $info){
+			$winner_name[] = $info['name'];
+		}
+
+		$this->insert_news('end_info', array('type' => $type, 'winner' => $winners));
+
+		$gameinfo['gamestate'] = 0;
+		$gameinfo['winner'] = $winner_name;
+		$gameinfo['winmode'] = $type;
+		
+		$gameinfo['starttime'] = time() + $game_interval * 60;//$this->get_next_game_time();
+
+		$this->insert_news('end');
+		
+		$GLOBALS['a']->action('end', array(), true);
+		
+		$news = $db->select('news', array('time', 'content'));
+
+		$winner_data = array();
+		foreach($winners as $winner){
+			$winner_data[] = $winner->data;
+		}
+		
+		$db->insert('history', array('gamenum' => $this->gameinfo['gamenum'], 'type' => $type, 'time' => time(), 'winners' => $winner_data, 'winner_info' => $winner_info, 'news' => $news));
+
+		return $winners;
+	}
+	
 	//为实现玩家激活时写入ip信息，重载了此函数
 	public function enter_game()
 	{
@@ -211,6 +303,9 @@ class game_dtsp extends game_bra
 		if(is_array($players_dying)){
 			foreach($players_dying as $pdata){
 				$player = new_player($pdata);
+				if(!in_array($player->area, $forbidden) || $player->tactic == 3){
+					continue; //数据库中的数据有可能未更新，因此要在与缓存合并后再次检查
+				}
 				foreach($player->buff as &$buff){
 					switch($buff['type']){
 						//八云紫套三件效果
@@ -259,14 +354,12 @@ class game_dtsp extends game_bra
 			case 'end_info':
 				switch($args['type']){
 					case 'survive':
-						$player_data = $this->get_player_by_id($args['winner'][0]);
-						$winner = new_player($player_data);
+						$winner = $args['winner'][0];
 						$content = '<span class="system">'.$winner->name.' 在游戏中最后幸存，游戏结束</span>';
 						break;
 						
 					case 'laststand':
-						$player_data = $this->get_player_by_id($args['winner'][0]);
-						$winner = new_player($player_data);
+						$winner = $args['winner'][0];
 						$content = '<span class="system">'.$winner->name.' 成功逃出战场，游戏结束</span>';
 						break;
 				
@@ -503,90 +596,6 @@ class game_dtsp extends game_bra
 		}
 		
 		return $db->batch_insert('items', $data, true);
-	}
-	/**
-	 * 游戏结束时（所有结局）会调用的函数
-	 * 重载了引擎game类的同名方法
-	 *
-	 * param $type(int) 游戏结局
-	 * param $winner(mixed) 胜利者id
-	 * param $mode(string) 胜利方式（团队或个人）
-	 * return array 胜利玩家的id
-	 */
-	public function game_end($type = 'timeup', $winner = array(), $mode = 'team') //TODO: 发送推送消息（剧情）
-	{
-		global $gameinfo, $db, $p, $game_interval;
-		
-		if(is_array($winner) === false){
-			$winner = array($winner);
-		}
-		
-		$winners = $db->select('players', '*', array('_id' => array('$in' => $winner)));
-		if(!$winners){
-			$winners = array();
-		}
-		//将队伍玩家全部加入胜利者名单中 TODO: 分离各函数
-		if($mode === 'team'){
-			foreach($winners as $player){
-				if($player['teamID'] != -1){
-					$teammates = $db->select('players', '*', array('teamID' => $player['teamID']));
-					foreach($teammates as $teammate){
-						if(false === in_array($teammate['_id'], $winner)){
-							$winner[] = $teammate['_id'];
-							$winners[] = $teammate;
-						}
-					}
-				}
-			}
-		}
-		
-		//获取队伍名字
-		foreach($winners as &$player){
-			if($player['teamID'] == -1){
-				$player['team'] = '无队伍';
-			}else{
-				$team = $db->select('team', array('name'), array('_id' => $player['teamID']));
-				if($team){
-					$player['team'] = $team[0]['name'];
-				}else{
-					$player['team'] = '无队伍'; //存储异常
-				}
-			}
-		}
-		
-		//生成简略信息
-		$winner_info = array();
-		foreach($winners as &$player){ //此处不用引用会将所有胜利者都变成下标为0的玩家
-			$winner_info[] = array(
-				'name' => ($player['teamID'] == -1 ? '' : '['.$player['team'].']').$player['name'],
-				'icon' => $player['icon'],
-				'motto' => $player['motto']
-				);
-		}
-		
-		//生成上局胜利玩家
-		$winner_name = array();
-		foreach($winner_info as $info){
-			$winner_name[] = $info['name'];
-		}
-		
-		$this->insert_news('end_info', array('type' => $type, 'winner' => $winner));
-		
-		$gameinfo['gamestate'] = 0;
-		$gameinfo['winner'] = $winner_name;
-		$gameinfo['winmode'] = $type;
-		
-		$gameinfo['starttime'] = (ceil(time() / 60)+ $game_interval)*60; //下一局游戏开始时间顺延
-		
-		$this->insert_news('end');
-		
-		$GLOBALS['a']->action('end', array(), true);
-		
-		$news = $db->select('news', array('time', 'content'));
-		
-		$db->insert('history', array('gamenum' => $this->gameinfo['gamenum'], 'type' => $type, 'time' => time(), 'winners' => $winners, 'winner_info' => $winner_info, 'news' => $news));
-		
-		return $winner;
 	}
 	
 	function check_all_laststand(){

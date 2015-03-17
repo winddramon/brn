@@ -431,7 +431,7 @@ class player_dtsp extends player_bra
 		//必须放在继承函数之后，否则诸如攻击增益的效果将计算buff取消前的数值
 		switch($buff['type']){
 			case 'last_stand':
-				$GLOBALS['g']->game_end('laststand', $this->_id);
+				$GLOBALS['g']->game_end('laststand', $this, 'individual');
 				break;
 				
 			case 'ageless_dream':
@@ -450,7 +450,7 @@ class player_dtsp extends player_bra
 				break;
 			
 			case 'lunar_incense':
-				$this->sacrifice(array('killer' => $buff['param']['killer']));
+				$this->sacrifice(array('pid' => $buff['param']['killer']));
 				break;
 			
 			case 'extra_package':
