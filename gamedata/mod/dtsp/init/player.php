@@ -83,7 +83,7 @@ $GLOBALS['randomitem'] = array(
 		)
 	);
 $GLOBALS['universalpackage'] = array(
-	'item' => array(i('面包', 'HH', 100, 20), i('矿泉水', 'HS', 250, 20), i('传送装置', 'YR', 1, 100, array('region' => 3)), i('BUFF状态切换器', 'Y', 250, 20, 'last_stand'))
+	'item' => array(i('面包', 'HH', 100, 20), i('矿泉水', 'HS', 250, 20), i('传送装置', 'YR', 1, 100, array('region' => 3)), i('BUFF状态切换器', 'Y', 250, 20, array('last_stand')), i('空气针管', 'Y', 1, 1))
 	);
 
 $GLOBALS['genderpackage'] = array(

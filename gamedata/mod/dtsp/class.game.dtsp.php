@@ -381,6 +381,19 @@ class game_dtsp extends game_bra
 						break;
 				}
 				break;
+			case 'kill':
+				$args['type'] = isset($args['type']) ? $args['type'] : 'default';
+				switch($args['type']){
+					case 'suicide':
+						$content = '<span class="username">'.$args['deceased'].'</span>放弃了希望，自杀身亡';
+						break;
+						
+					default:
+						$content = parent::insert_news($type, $args);
+						return $content;
+						break;
+				}
+				break;
 				
 			case 'compose':
 				$composer = '<span class="username">'.$args['composer'].'</span>';
@@ -600,20 +613,33 @@ class game_dtsp extends game_bra
 	
 	function check_all_laststand(){
 		global $db, $g, $cplayer, $map_final_region;
-		$laststanders = $db->select('players', '_id', array('type' => GAME_PLAYER_USER, 'region' => $map_final_region));
-		if(is_array($laststanders) && sizeof($laststanders) >= 2){
-			foreach($laststanders as $lval){
-				if($lval['_id'] == $cplayer->_id){
-					$lplayer = &$cplayer;
-				}else{
-					$lp = $this->get_player_by_id($lval['_id']);
-					$lplayer = new_player($lp);
-				}
+		
+		$cid = $cplayer->_id;
+		$llist = $db->select('players', '_id', array('_id' =>array('$ne' => $cid), 'type' => GAME_PLAYER_USER, 'region' => $map_final_region, 'hp' => array('$gt' => 0)));	
+		if($cplayer->region == $map_final_region){
+			if(!is_array($llist)){$llist = array();}
+			$llist[] = array('_id' => $cid);
+		}
+		if(!$llist){return;}
+		$lnum = sizeof($llist);
+		
+		foreach($llist as $lval){
+			if($lval['_id'] == $cid){
+				$lplayer = &$cplayer;
+			}else{
+				$lpdata = $this->get_player_by_id($lval['_id']);
+				$lplayer = new_player($lpdata);
+			}
+			if($lnum >= 2){//冻结全部
 				if($lplayer->freeze_buff('last_stand')){
 					$lplayer->feedback('由于有敌人存在，你的倒计时停止了！');
-				}				
-			}
-		}
+				}	
+			}else{//解冻全部（只有一个）
+				if($lplayer->unfreeze_buff('last_stand')){
+					$lplayer->feedback('由于敌人消失，你的倒计时重启了！');
+				}	
+			}							
+		}		
 		return;
 	}
 }

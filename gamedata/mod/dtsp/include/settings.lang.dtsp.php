@@ -239,7 +239,14 @@ $iteminfo = array(
 	'XT' => '位置传送',
 	'default' => '物品'
 	);
-
+//行动名（仅用于显示）
+$actioninfo = array(
+	'move' => '移动',
+	'search' => '搜索',
+	'create_team' => '创建队伍',
+	'join_team' => '加入队伍'
+	);
+	
 //基础姿态名
 $poseinfo = Array(
 	'通常',
@@ -250,11 +257,29 @@ $poseinfo = Array(
 	'治疗',
 	'狙击'
 	);
+	
+//应战方针名（仅用于显示）
+$tacticinfo = Array(
+	'通常',
+	'重视防御',
+	'重视反击',
+	'重视躲避'
+	);
 
 //致死原因（仅用于显示）
 $deathreasoninfo = array(
 	'forbid' => '禁区停留',
-	'ageless_land' => 'Ageless Land'
+	'suicide' => '自杀身亡',
+	'ageless_land' => 'Ageless Land',
+	'weapon_p' => '殴打致死',
+	'weapon_k' => '利器击杀',
+	'weapon_g' => '远程射杀',
+	'weapon_c' => '致命投掷',
+	'weapon_d' => '剧烈爆炸',
+	'poison' => '中毒身亡',
+	'injure' => '旧伤复发',
+	'trap' => '触发陷阱',
+	'default' => '神秘死亡'
 	);
 
 //结局

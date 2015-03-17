@@ -107,8 +107,13 @@ class item_dtsp extends item_bra
 		
 		$success = true;
 		switch($this->data['n']){
+			case '空气针管':
+				$this->apply_suicide();
+				$success = false;
+				break;
+				
 			case 'BUFF状态切换器':
-				$bufftype = $this->data['sk'];
+				$bufftype = $this->data['sk'][0];
 				foreach($this->player->data['buff'] as &$bval){
 					if($bval['type'] == $bufftype){
 						if($bval['time'] > 0){
@@ -270,6 +275,12 @@ class item_dtsp extends item_bra
 			$this->consume();
 		}
 		
+		return;
+	}
+	
+	protected function apply_suicide(){
+		$this->player->feedback('你把空气打进了你的静脉。一阵痉挛之后，你失去了知觉。');
+		$this->player->sacrifice(array('type' => 'suicide'));
 		return;
 	}
 	
