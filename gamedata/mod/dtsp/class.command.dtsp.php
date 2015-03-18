@@ -94,6 +94,12 @@ class command_dtsp extends command_bra
 				parent::action_handler($action, $param);
 				break;
 		}
+		//最终战场特殊判定：1. 增加倒计时  2. 如果最终战场的玩家数在2以上，则暂停所有玩家的倒计时
+		if($cplayer){
+			$g->check_all_laststand($cplayer);
+		}else{
+			$g->check_all_laststand();
+		}
 	}
 }
 

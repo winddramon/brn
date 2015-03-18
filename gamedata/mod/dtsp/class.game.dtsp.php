@@ -611,20 +611,24 @@ class game_dtsp extends game_bra
 		return $db->batch_insert('items', $data, true);
 	}
 	
-	function check_all_laststand(){
-		global $db, $g, $cplayer, $map_final_region;
-		
-		$cid = $cplayer->_id;
-		$llist = $db->select('players', '_id', array('_id' =>array('$ne' => $cid), 'type' => GAME_PLAYER_USER, 'region' => $map_final_region, 'hp' => array('$gt' => 0)));	
-		if($cplayer->region == $map_final_region){
-			if(!is_array($llist)){$llist = array();}
-			$llist[] = array('_id' => $cid);
+	function check_all_laststand($cplayer = false){
+		global $db, $g, $map_final_region;
+		if($cplayer){//如果传参则单独判定$cplayer防止忽略缓存
+			$llist = $db->select('players', '_id', array('_id' =>array('$ne' => $cplayer->_id), 'type' => GAME_PLAYER_USER, 'region' => $map_final_region, 'hp' => array('$gt' => 0)));	
+			if($cplayer->region == $map_final_region){
+				if(!is_array($llist)){$llist = array();}
+				$llist[] = array('_id' => $cplayer->_id);
+			}
+		}else{
+			$llist = $db->select('players', '_id', array('type' => GAME_PLAYER_USER, 'region' => $map_final_region, 'hp' => array('$gt' => 0)));	
 		}
+		
+		
 		if(!$llist){return;}
 		$lnum = sizeof($llist);
 		
 		foreach($llist as $lval){
-			if($lval['_id'] == $cid){
+			if($cplayer && $lval['_id'] == $cplayer->_id){
 				$lplayer = &$cplayer;
 			}else{
 				$lpdata = $this->get_player_by_id($lval['_id']);
@@ -639,8 +643,21 @@ class game_dtsp extends game_bra
 					$lplayer->feedback('由于敌人消失，你的倒计时重启了！');
 				}	
 			}							
-		}		
+		}
+		
 		return;
+	}
+	
+	public function __destruct()
+	{
+//		if(isset($GLOBALS['cplayer'])){
+//			$this->check_all_laststand($GLOBALS['cplayer']);
+//			file_put_contents('a.txt','1');
+//		}else{
+//			$this->check_all_laststand();
+//			file_put_contents('a.txt','2');
+//		}
+		return parent::__destruct();
 	}
 }
 

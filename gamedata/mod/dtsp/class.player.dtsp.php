@@ -67,10 +67,10 @@ class player_dtsp extends player_bra
 			$hr = $this->get_heal_rate();
 			$this->ajax('heal_speed', array('hpps' => $hr['hp'], 'spps' => $hr['sp']));
 			
-			//最终战场特殊判定：1. 增加倒计时  2. 如果最终战场的玩家数在2以上，则暂停所有玩家的倒计时
+			//进入最终战场的时候 增加倒计时
 			if($region == $map_final_region){
 				$this->check_laststand();
-				$g->check_all_laststand();	
+//				$g->check_all_laststand($this);	
 			}
 		}
 		
@@ -84,7 +84,7 @@ class player_dtsp extends player_bra
 		parent::search();
 		if($this->region == $map_final_region){
 			$this->check_laststand();
-			$g->check_all_laststand();	
+//			$g->check_all_laststand($this);	
 		}
 		return;
 	}
@@ -431,7 +431,10 @@ class player_dtsp extends player_bra
 		//必须放在继承函数之后，否则诸如攻击增益的效果将计算buff取消前的数值
 		switch($buff['type']){
 			case 'last_stand':
-				$GLOBALS['g']->game_end('laststand', $this, 'individual');
+				global $map_final_region;
+				if($this->region == $map_final_region){
+					$GLOBALS['g']->game_end('laststand', $this, 'individual');
+				}				
 				break;
 				
 			case 'ageless_dream':
