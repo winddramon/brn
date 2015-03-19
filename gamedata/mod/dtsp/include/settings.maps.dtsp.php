@@ -11,12 +11,36 @@ $map_random_group = array(
 		'list' => array(11,12,13,14)
 	),
 );
-$map_final_region = 3;
-$map_region_access = array(//区域入口，0或者正数为地图编号，负数为该等级随机
-	0 => 0,
-	1 => 1,
-	2 => -1,
-	3 => 3
+
+$regioninfo = array(//区域入口: 0或者正数为地图编号，负数为该等级随机
+	0 => array(
+		'id' => 0,
+		'type' => 'start',
+		'destination' => 1,
+		'access' => false,
+		'duration' => 15
+	),
+	1 => array(
+		'id' => 1,
+		'type' => 'normal',
+		'destination' => 2,
+		'access' => 1,
+		'duration' => 15
+	),
+	2 => array(
+		'id' => 2,
+		'type' => 'normal',
+		'destination' => 3,
+		'access' => -1,
+		'duration' => 15
+	),
+	3 => array(
+		'id' => 3,
+		'type' => 'end',
+		'destination' => false,
+		'access' => 3,
+		'duration' => 60
+	)
 );
 $mapinfo = array(
 	array(
@@ -65,4 +89,3 @@ $mapinfo = array(
 	)
 
 );
-?>

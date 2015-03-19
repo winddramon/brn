@@ -102,5 +102,3 @@ class command_dtsp extends command_bra
 		}
 	}
 }
-
-?>

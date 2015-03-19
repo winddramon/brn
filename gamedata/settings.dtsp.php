@@ -249,6 +249,3 @@ $modulus_counter = array(
 	'pose' => array(6 => 1.1),
 	'tactic' => array(2 => 1.2, 3 => 0)
 	);
-
-
-?>

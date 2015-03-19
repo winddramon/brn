@@ -17,10 +17,10 @@ class player_dtsp extends player_bra
 			return $this->error('你已经死了');
 		}
 		
-		global $g, $m, $shopmap, $map_final_region, $last_stand;
+		global $g, $m, $shopmap, $last_stand;
 		$data = &$this->data;
 		$destination = intval($destination);
-		
+		$final_region = $m->ritget('end', 'id');
 		if($data['action'] && isset($data['action']['battle'])){
 			$this->error('战斗中，无法移动');
 		}
@@ -68,10 +68,11 @@ class player_dtsp extends player_bra
 			$this->ajax('heal_speed', array('hpps' => $hr['hp'], 'spps' => $hr['sp']));
 			
 			//进入最终战场的时候 增加倒计时
-			if($region == $map_final_region){
-				$this->check_laststand();
+			if($region == $final_region){
+				$this->set_last_stand();
 //				$g->check_all_laststand($this);	
 			}
+			$this->set_region_jump();
 		}
 		
 		return;
@@ -79,17 +80,19 @@ class player_dtsp extends player_bra
 	
 	public function search()
 	{
-		global $g, $m, $map_final_region;
+		global $g, $m;
+		$final_region = $m->ritget('end', 'id');
 		$this->region = $m->iget($this->area,'r');
 		parent::search();
-		if($this->region == $map_final_region){
-			$this->check_laststand();
+		if($this->region == $final_region){
+			$this->set_last_stand();
 //			$g->check_all_laststand($this);	
 		}
+		$this->set_region_jump();
 		return;
 	}
 	
-	protected function check_laststand(){
+	protected function set_last_stand(){
 		global $last_stand;
 		$already = false;
 		foreach($this->data['buff'] as &$buff){
@@ -107,7 +110,26 @@ class player_dtsp extends player_bra
 		}	
 		return;
 	}
-	
+
+	protected function set_region_jump(){
+		global $m;
+		$already = false;
+		foreach($this->data['buff'] as &$buff){
+			switch($buff['type']){
+				case 'region_jump':
+					if($buff['param']['destination'] == $m->riiget($this->region, 'destination')){
+						$already = true;
+					}
+					break;
+
+				default:
+					break;
+			}
+		}
+		if(!$already && $m->riiget($this->region, 'destination') !== false){
+			$this->buff('region_jump', $m->riiget($this->region, 'duration'), array('destination' => $m->riiget($this->region, 'destination')));
+		}
+	}
 	protected function get_consumption($action)
 	{
 		$consumption = parent::get_consumption($action);
@@ -258,7 +280,21 @@ class player_dtsp extends player_bra
 	public function buff($name, $duration = 0, array $param = array())
 	{
 		switch($name){
+			//新buff直接覆盖旧buff
+			case 'last_stand':
+			case 'region_jump':
+				foreach($this->data['buff'] as &$buff){
+					if($buff['type'] === $name){
+						$buff['duration'] = ($duration == 0) ? 0 : time() + $duration;
+						$buff['param'] = array_merge($buff['param'], $param);
+						$this->ajax('buff', array('buff' => $this->parse_buff()));
+						return;
+					}
+				}
+				break;
 			//不叠加新buff而是在存在buff上增加时长
+			case 'last_stand':
+			case 'region_jump':
 			case 'tolerance':
 			case 'invincible':
 			case 'scarlet_moonlight':
@@ -431,12 +467,19 @@ class player_dtsp extends player_bra
 		//必须放在继承函数之后，否则诸如攻击增益的效果将计算buff取消前的数值
 		switch($buff['type']){
 			case 'last_stand':
-				global $map_final_region;
-				if($this->region == $map_final_region){
+				global $m;
+				if($this->region == $m->ritget('end', 'id')){
 					$GLOBALS['g']->game_end('laststand', $this, 'individual');
-				}				
+				}
 				break;
-				
+			case 'region_jump':
+				global $m;
+				if($buff['param']['destination'] == $m->riiget($this->region, 'destination')){//条件：所在地图的区域的目的地与buff记载的目的地相同
+					$this->move($m->get_region_access($buff['param']['destination']), true, true);
+					$this->feedback('时间到了，必须得移动了！');
+				}
+
+				break;
 			case 'ageless_dream':
 				$hr = $this->get_heal_rate();
 				$this->ajax('heal_speed', array('hpps' => $hr['hp'], 'spps' => $hr['sp']));
@@ -1065,5 +1108,3 @@ class player_dtsp extends player_bra
 		}
 	}
 }
-
-?>

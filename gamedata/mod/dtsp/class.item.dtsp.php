@@ -286,7 +286,7 @@ class item_dtsp extends item_bra
 	
 	protected function apply_region_move()
 	{
-		global $m, $map_region_access, $shopmap;
+		global $m, $shopmap;
 		if(!isset($this->data['sk']['region'])){
 			$this->player->error('跨区移动参数错误1');
 			return;
@@ -816,5 +816,3 @@ class item_dtsp extends item_bra
 		return;
 	}
 }
-
-?>

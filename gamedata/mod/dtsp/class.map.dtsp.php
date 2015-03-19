@@ -4,23 +4,35 @@ class map_dtsp		//把gameinfo的动态地图数据和init.maps.php里的静态�
 	protected $data_by_id = array();
 	protected $data_by_coordinate = array();
 	protected $mapinfo_by_id = array();
-	
+	protected $regioninfo_by_id = array();
+
 	public function __construct()
 	{
 		global $g;
 		$this->parse_mapinfo_by_id();
+		$this->parse_regioninfo_by_id();
 		$this->init($g->gameinfo['maplist']);
 		//file_put_contents('a.txt',$this->mapinfo_by_id[11]);
 		return;
 	}
-	
-	public function parse_mapinfo_by_id(){
+
+	protected function parse_mapinfo_by_id(){
 		global $mapinfo;
 		$mapinfo_by_id = array();
 		foreach($mapinfo as $mval){
 			$mapinfo_by_id[$mval['id']] = $mval;
 		}
 		$this->mapinfo_by_id = $mapinfo_by_id;
+		return;
+	}
+
+	protected function parse_regioninfo_by_id(){
+		global $regioninfo;
+		$regioninfo_by_id = array();
+		foreach($regioninfo as $rval){
+			$regioninfo_by_id[$rval['id']] = $rval;
+		}
+		$this->regioninfo_by_id = $regioninfo_by_id;
 		return;
 	}
 	
@@ -83,7 +95,14 @@ class map_dtsp		//把gameinfo的动态地图数据和init.maps.php里的静态�
 		$g->gameinfo['maplist'] = $maplist;
 		return;
 	}
-	
+
+	/**
+	 * 按id获取地图数据值
+	 *
+	 * @param $area 传入的id
+	 * @param string $attr 要获取的键名
+	 * @return bool
+	 */
 	public function iget($area, $attr = 'n')
 	{
 		if(isset($this->data_by_id[$area][$attr])){
@@ -92,7 +111,14 @@ class map_dtsp		//把gameinfo的动态地图数据和init.maps.php里的静态�
 			return false;
 		}		
 	}
-	
+
+	/**
+	 * 按坐标获取地图数据值
+	 *
+	 * @param $coor 传入的坐标
+	 * @param string $attr 要获取的键名
+	 * @return bool
+	 */
 	public function cget($coor, $attr = 'n')
 	{
 		if(isset($this->data_by_coordinate[$coor][$attr])){
@@ -101,15 +127,26 @@ class map_dtsp		//把gameinfo的动态地图数据和init.maps.php里的静态�
 			return false;
 		}		
 	}
-	
+
+	/**
+	 * 获得所有地图数据组成的数组
+	 *
+	 * @param bool $keys 参数为true表示只获取键名即地图编号
+	 * @return array
+	 */
 	public function allget($keys = false){
 		return $keys ? array_keys($this->data_by_id) : $this->data_by_id;
 	}
-	
+
+	/**
+	 * 计算特定区域的入口地图编号，如果该地图设定上是随机入口那么返回该区域的一个随机的地图编号
+	 *
+	 * @param $region 传入的区域编号
+	 */
 	public function get_region_access($region)
 	{
-		global $g, $m, $map_region_access, $shopmap;
-		$destination = $map_region_access[$region];
+		global $g, $m, $shopmap;
+		$destination = $this->riiget($region, 'access');
 		if(!$destination || ($destination >= 0 && !$m->iget($destination))){
 			$cplayer = $g->current_player();
 			$cplayer->error('跨区移动参数错误2');
@@ -127,6 +164,33 @@ class map_dtsp		//把gameinfo的动态地图数据和init.maps.php里的静态�
 		}
 		
 		return $destination;
+	}
+
+	/**
+	 * 获得特定区域的静态数据
+	 *
+	 * @param $region 传入的区域编号
+	 * @param string $attr 要获得的区域数据
+	 * @return bool
+	 */
+	public function riiget($region, $attr = 'id'){
+		if(isset($this->regioninfo_by_id[$region][$attr])){
+			return $this->regioninfo_by_id[$region][$attr];
+		}else{
+			return false;
+		}
+	}
+
+	public function ritget($type, $attr = 'id'){
+		$regions = array();
+		foreach($this->regioninfo_by_id as $rkey => $rval){
+			if($rval['type'] == $type){
+				$regions[] = $rkey;
+			}
+		}
+		if(sizeof($regions) == 0){return false;}
+		elseif(sizeof($regions) == 1){return $regions[0];}
+		else{return $regions;}
 	}
 }
 ?>

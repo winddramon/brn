@@ -612,15 +612,16 @@ class game_dtsp extends game_bra
 	}
 	
 	function check_all_laststand($cplayer = false){
-		global $db, $g, $map_final_region;
+		global $db, $g, $m;
+		$final_region = $m->ritget('end', 'id');
 		if($cplayer){//如果传参则单独判定$cplayer防止忽略缓存
-			$llist = $db->select('players', '_id', array('_id' =>array('$ne' => $cplayer->_id), 'type' => GAME_PLAYER_USER, 'region' => $map_final_region, 'hp' => array('$gt' => 0)));	
-			if($cplayer->region == $map_final_region){
+			$llist = $db->select('players', '_id', array('_id' =>array('$ne' => $cplayer->_id), 'type' => GAME_PLAYER_USER, 'region' => $final_region, 'hp' => array('$gt' => 0)));
+			if($cplayer->region == $final_region){
 				if(!is_array($llist)){$llist = array();}
 				$llist[] = array('_id' => $cplayer->_id);
 			}
 		}else{
-			$llist = $db->select('players', '_id', array('type' => GAME_PLAYER_USER, 'region' => $map_final_region, 'hp' => array('$gt' => 0)));	
+			$llist = $db->select('players', '_id', array('type' => GAME_PLAYER_USER, 'region' => $final_region, 'hp' => array('$gt' => 0)));	
 		}
 		
 		
@@ -660,5 +661,3 @@ class game_dtsp extends game_bra
 		return parent::__destruct();
 	}
 }
-
-?>
