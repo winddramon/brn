@@ -178,7 +178,7 @@ class game_dtsp extends game_bra
 	protected function new_player()
 	{
 		$player = parent::new_player();
-		$player['region'] = 1; //避免开局就无法移动
+		//$player['region'] = 1000; //避免开局就无法移动
 		return $player;
 	}
 	

@@ -38,8 +38,8 @@ class player_dtsp extends player_bra
 			if(!$mapname){
 				$this->error('无效的目的地');
 			}
-			$region = $m->iget($destination, 'r');
-			if($m->iget(intval($data['area']), 'r') !== $region && !$across_regions){
+			$dregion = $m->iget($destination, 'r');
+			if($m->iget(intval($data['area']), 'r') !== $dregion && !$across_regions && $m->riiget($this->region, 'type') != 'start'){
 				$this->error('无法跨区移动');
 			}
 			$status = $this->area_status($destination);
@@ -57,7 +57,7 @@ class player_dtsp extends player_bra
 			
 			//开始移动
 			$data['area'] = $destination;
-			$data['region'] = $region;
+			$data['region'] = $dregion;
 			$this->feedback('移动到了 '.$mapname);
 			$this->ajax('location', array('name' => $mapname, 'shop' => in_array(intval($data['area']), $shopmap, true)));
 			if(!$ignore_search){
@@ -68,7 +68,7 @@ class player_dtsp extends player_bra
 			$this->ajax('heal_speed', array('hpps' => $hr['hp'], 'spps' => $hr['sp']));
 			
 			//进入最终战场的时候 增加倒计时
-			if($region == $final_region){
+			if($dregion == $final_region){
 				$this->set_last_stand();
 //				$g->check_all_laststand($this);	
 			}
@@ -126,7 +126,7 @@ class player_dtsp extends player_bra
 					break;
 			}
 		}
-		if(!$already && $m->riiget($this->region, 'destination') !== false){
+		if(!$already && $m->riiget($this->region, 'duration') && $m->riiget($this->region, 'destination')){
 			$this->buff('region_jump', $m->riiget($this->region, 'duration'), array('destination' => $m->riiget($this->region, 'destination')));
 		}
 	}

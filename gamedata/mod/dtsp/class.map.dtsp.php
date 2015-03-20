@@ -9,8 +9,8 @@ class map_dtsp		//把gameinfo的动态地图数据和init.maps.php里的静态�
 	public function __construct()
 	{
 		global $g;
-		$this->parse_mapinfo_by_id();
 		$this->parse_regioninfo_by_id();
+		$this->parse_mapinfo_by_id();
 		$this->init($g->gameinfo['maplist']);
 		//file_put_contents('a.txt',$this->mapinfo_by_id[11]);
 		return;
@@ -22,7 +22,16 @@ class map_dtsp		//把gameinfo的动态地图数据和init.maps.php里的静态�
 		foreach($mapinfo as $mval){
 			$mapinfo_by_id[$mval['id']] = $mval;
 		}
+		foreach($this->regioninfo_by_id as $rval){
+			foreach($rval['group'] as $gval){
+				foreach($gval['list'] as $lval){
+					$mapinfo_by_id[$lval] = array_merge($mapinfo_by_id[$lval], array('r' => $rval['id']));
+				}
+			}
+		}
+
 		$this->mapinfo_by_id = $mapinfo_by_id;
+
 		return;
 	}
 
@@ -46,35 +55,40 @@ class map_dtsp		//把gameinfo的动态地图数据和init.maps.php里的静态�
 	}	
 	
 	public function reload(){
-		global $g, $mapinfo, $map_random_group, $map_size;
+		global $map_size;
 		
 		$maplist = $map_coordinates = array();
-		foreach($map_random_group as $rgval){//先把全部固定地图标注完毕
-			if($rgval['num'] < 0){
-				foreach($rgval['list'] as $lval){
-					$map_coordinates[] = $this->mapinfo_by_id[$lval]['c'];
-					$maplist[] = $this->mapinfo_by_id[$lval];
-				}
-			}		
-		}
-		foreach($map_random_group as $rgval){//之后分配随机地图。这个参数是0的地图完全不放置
-			if($rgval['num'] > 0){
-				shuffle($rgval['list']);
-				$mcont = array_slice($rgval['list'],0,$rgval['num']);
-				foreach($mcont as $lval){
-					$mdata = $this->mapinfo_by_id[$lval];
-					$i = 0;
-					do{
-						$mcoor = random(0,$map_size[0]).'-'.random(0,$map_size[1]);
-						if($i >= 1000){throw_error('Initiating maps failed.');}
-						$i++;
-					}while(in_array($mcoor, $map_coordinates));
-					$mdata['c'] = $mcoor;
-					$map_coordinates[] = $mdata['c'];
-					$maplist[] = $mdata;
+		foreach($this->regioninfo_by_id as $rval){//先把全部固定地图标注完毕
+			foreach($rval['group'] as $gval){
+				if($gval['num'] < 0){
+					foreach($gval['list'] as $lval){
+						$map_coordinates[] = $this->mapinfo_by_id[$lval]['c'];
+						$maplist[] = $this->mapinfo_by_id[$lval];
+					}
 				}
 			}
 		}
+		foreach($this->regioninfo_by_id as $rval){//之后分配随机地图。这个参数是0的地图完全不放置
+			foreach($rval['group'] as $gval){
+				if($gval['num'] > 0){
+					shuffle($gval['list']);
+					$mlist = array_slice($gval['list'],0,$gval['num']);
+					foreach($mlist as $lval){
+						$mdata = $this->mapinfo_by_id[$lval];
+						$i = 0;
+						do{
+							$mcoor = random(0,$map_size[0]).'-'.random(0,$map_size[1]);
+							if($i >= 1000){throw_error('Initiating maps failed.');}
+							$i++;
+						}while(in_array($mcoor, $map_coordinates));
+						$mdata['c'] = $mcoor;
+						$map_coordinates[] = $mdata['c'];
+						$maplist[] = $mdata;
+					}
+				}
+			}
+		}
+
 
 		
 		$this->init($maplist);
@@ -149,7 +163,7 @@ class map_dtsp		//把gameinfo的动态地图数据和init.maps.php里的静态�
 		$destination = $this->riiget($region, 'access');
 		if(!$destination || ($destination >= 0 && !$m->iget($destination))){
 			$cplayer = $g->current_player();
-			$cplayer->error('跨区移动参数错误2');
+			$cplayer->error('destination:' .$destination. ' 跨区移动参数错误2');
 			return;
 		}
 		if($destination < 0){//该等级随机
@@ -193,4 +207,3 @@ class map_dtsp		//把gameinfo的动态地图数据和init.maps.php里的静态�
 		else{return $regions;}
 	}
 }
-?>
