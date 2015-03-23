@@ -1,3 +1,13 @@
+Battle Royale Prototype
+===
+No I18N available either.
+
+BRP或称DTSP，是在BRN引擎基础上开发的游戏MOD。除资源层外，还将对游戏规则和游戏界面进行大量修改。
+DTSP不能脱离BRN引擎运行，但无需修改BRN引擎的任何文件。
+
+by Yoshiko_G
+
+
 Battle Royale Next-gen
 ===
 
@@ -12,3 +22,5 @@ BRN 是完全重构的 Battle Royale 游戏引擎，遵循 cc-by-sa 3.0 开源�
 可以使用文件缓存或 memcache。
 
 支持 SAE 也可以在标准 LAMP/WAMP 环境下运行。
+
+by Martin1994
