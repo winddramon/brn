@@ -51,10 +51,9 @@ class player
 	 * 增加完毕后会自动更新生命恢复速率
 	 * 如果MOD中有其他设定，请继承或重载此函数
 	 *
-	 * param $name(string) buff名
-	 * param $duration(int) buff持续时间
-	 * param $param(array) 其他参数
-	 * return null
+	 * @param string $name buff名
+	 * @param int $duration buff持续时间
+	 * @param array $param 其他参数
 	 */
 	public function buff($name, $duration = 0, array $param = array())
 	{
@@ -89,8 +88,7 @@ class player
 	 * 如果MOD中有其他设定，请继承或重载此函数
 	 * 若要判断被移除的buff是什么，在unset（调用父函数）之前判断 $this->data['buff'][$key]['type'] 的内容
 	 *
-	 * param $key(int) 需要移除的buff编号
-	 * return null
+	 * @param int $key 需要移除的buff编号
 	 */
 	public function remove_buff($key)
 	{
@@ -109,7 +107,7 @@ class player
 	/**
 	 * 将现有buff生成为一个只有种类与持续时间的数组，用于显示
 	 *
-	 * return array 用于显示的buff数组
+	 * @return array 用于显示的buff数组
 	 */
 	public function parse_buff()
 	{
@@ -128,8 +126,7 @@ class player
 	 * 到达经验会自动升级
 	 * 如果MOD中有其他设定，请继承或重载此函数，注意升级时执行的动作不在此函数内，而是在levelup()函数内
 	 *
-	 * param $add(int) 增加的经验值
-	 * return null
+	 * @param int $add 增加的经验值
 	 */
 	public function experience($add = 1)
 	{
@@ -152,8 +149,7 @@ class player
 	 * 会自动更新进行状况的缓存
 	 * 如果MOD中有其他设定（例如属性提升），请继承或重载此函数
 	 *
-	 * @param $extra_text(string) 如果MOD中需要显示额外的内容而又不想重载函数，可以传入此参数
-	 * @return null
+	 * @param string $extra_text 如果MOD中需要显示额外的内容而又不想重载函数，可以传入此参数
 	 */
 	protected function levelup($extra_text = '')
 	{
@@ -178,8 +174,7 @@ class player
 	 * 如果目的地相同会自动转换为探索
 	 * 如果MOD中有其他设定，请继承此函数
 	 *
-	 * @param $destination(int) 目的地的地图编号
-	 * @return null
+	 * @param int $destination 目的地的地图编号
 	 */
 	public function move($destination)
 	{
@@ -229,15 +224,11 @@ class player
 			$hr = $this->get_heal_rate();
 			$this->ajax('heal_speed', array('hpps' => $hr['hp'], 'spps' => $hr['sp']));
 		}
-		
-		return;
 	}
 	
 	/**
 	 * 探索
 	 * 如果MOD中有其他设定，请继承此函数
-	 *
-	 * return null
 	 */
 	public function search()
 	{
@@ -263,16 +254,15 @@ class player
 		$this->check_health($consumption, 'search');
 		
 		$this->discover('search');
-		
-		return;
 	}
 	
 	/**
 	 * 获取商店物品列表（根据当前玩家所在位置）
 	 *
-	 * param $kind(int) 物品种类（柜台）
-	 * param $show(boolean) 是否用于显示（否则就是用于判断商店货物存在）
+	 * @param int $kind 物品种类（柜台）
+	 * @param boolean $show 是否用于显示（否则就是用于判断商店货物存在），区别在于返回实际数据还是显示数据，比如无限大和0
 	 *
+	 * @return array 物品列表
 	 */
 	public function get_goods($kind = 0, $show = false)
 	{
@@ -314,8 +304,8 @@ class player
 	 * 获取商店物品
 	 * 如果MOD中有其他设定，请继承或重载此函数
 	 *
-	 * param $condition(array) 物品数组
-	 * return array/boolean
+	 * @param array $condition 物品数组
+	 * @return array|boolean
 	 */
 	protected function get_shop_items($condition)
 	{
@@ -327,8 +317,8 @@ class player
 	 * 不可合成的物品都为1
 	 * 如果MOD中有其他设定，请继承或重载此函数
 	 *
-	 * param $item(array) 物品数组
-	 * return null
+	 * @param array $item 物品数组
+	 * @return int
 	 */
 	protected function goods_max_num($item)
 	{
@@ -343,10 +333,9 @@ class player
 	 * 购买物品
 	 * 如果MOD中有其他设定，请继承此函数
 	 *
-	 * param $cart(array) 购物车
-	 * return null
+	 * param array $cart 购物车
 	 */
-	public function buy($cart)
+	public function buy(array $cart)
 	{
 		if(false === $this->is_alive()){
 			return $this->error('你已经死了');
@@ -1595,7 +1584,7 @@ class player
 			return $this->error('目前尚未碰到敌人');
 		}
 		
-		$enemy = get_player(array('_id' => $this->action['battle']['pid']));
+		$enemy = $GLOBALS['db']->select('players', '*', array('_id' => $this->action['battle']['pid']));
 		$enemy = new_player($enemy[0]);
 		
 		if($enemy->is_alive()){
@@ -1687,7 +1676,7 @@ class player
 			return $this->error('目前尚未碰到队友');
 		}
 		
-		$enemy = get_player(array('_id' => $this->action['battle']['pid']));
+		$enemy = $GLOBALS['db']->select('players', '*', array('_id' => $this->action['battle']['pid']));
 		$enemy = new_player($enemy[0]);
 		
 		if($enemy->teamID === '-1' || $enemy->teamID !== $this->teamID){
@@ -1785,7 +1774,7 @@ class player
 			return $this->error('目前没有碰到任何人');
 		}
 		
-		$enemy = get_player(array('_id' => $this->action['battle']['pid']));
+		$enemy = $GLOBALS['db']->select('players', '*', array('_id' => $this->action['battle']['pid']));
 		$enemy = new_player($enemy[0]);
 		
 		if(($enemy->teamID === '-1' || $enemy->teamID !== $this->teamID) && $enemy->is_alive()){
@@ -1905,7 +1894,7 @@ class player
 		
 		$threshold = $this->get_discover_threshold($mode);
 		
-		if(determine($threshold)){
+		if($GLOBALS['g']->determine($threshold)){
 			//遇敌
 			$players = $db->select('players', '*', array('area' => $this->area));
 			if(false === $players){
@@ -1917,7 +1906,7 @@ class player
 			foreach($players as &$player){
 				$enemy = new_player($player);
 				
-				if(determine($this->enemy_found_rate($enemy))){
+				if($GLOBALS['g']->determine($this->enemy_found_rate($enemy))){
 					//遇敌成功，进入战斗状态
 					$this->found_enemy($enemy);
 					//跳出循环，停止遇敌
@@ -1937,8 +1926,8 @@ class player
 				return;
 			}
 			$threshold = $this->get_item_found_rate();
-			if(determine($threshold)){
-				$item = $items[random(0, sizeof($items) - 1)];
+			if($GLOBALS['g']->determine($threshold)){
+				$item = $items[$GLOBALS['g']->random(0, sizeof($items) - 1)];
 				unset($items);
 				$db->delete('items', array('_id' => $item['_id']));
 				$item = array(
@@ -1973,7 +1962,7 @@ class player
 	
 	protected function calculate_trap_damage(&$trap)
 	{
-		return round(random(0, floor($trap['e'] / 2)) + $trap['e'] / 2);
+		return round($GLOBALS['g']->random(0, floor($trap['e'] / 2)) + $trap['e'] / 2);
 	}
 	
 	protected function get_enemy_found_rate()
