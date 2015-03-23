@@ -43,7 +43,7 @@ class game_dtsp extends game_bra
 	 * 为使下一局游戏的时间变更而重载此函数
 	 *
 	 * @param string 游戏结局
-	 * @param mixed $winner 胜利者player对象（可以是数组也可以是单个对象）
+	 * @param player|array $winner 胜利者player对象（可以是数组也可以是单个对象）
 	 * @param string $mode 胜利方式（团队或个人）
 	 * @return array 胜利玩家的id
 	 */
@@ -145,14 +145,14 @@ class game_dtsp extends game_bra
 		
 		$gameinfo['validnum'] ++;
 		$gameinfo['alivenum'] ++;
-		
-		$player = $this->new_player();
+
+		$player = $this->new_joined_player();
 		
 		$db->insert('players', $player);
 		
 		do{
 			$loop = false;
-			$GLOBALS['cplayer'] = current_player();
+			$GLOBALS['cplayer'] = $this->current_player();
 			if($GLOBALS['cplayer'] === false){
 				$loop = true;
 				usleep(100000);
@@ -174,11 +174,12 @@ class game_dtsp extends game_bra
 		
 		return;
 	}
-	
-	protected function new_player()
+
+	protected function new_joined_player()
 	{
-		$player = parent::new_player();
-		//$player['region'] = 1000; //避免开局就无法移动
+		//$player = parent::new_player();
+		$player = game::new_joined_player();
+		$player['exp'] = $GLOBALS['gameinfo']['round'] * 75;
 		return $player;
 	}
 	
@@ -279,7 +280,7 @@ class game_dtsp extends game_bra
 	
 	protected function np_generate_club(&$user)
 	{
-		return (isset($GLOBALS['param']['club']) && $GLOBALS['param']['club'] > 0 && $GLOBALS['param']['club'] < sizeof($GLOBALS['clubinfo'])) ? $GLOBALS['param']['club'] : random(1, sizeof($GLOBALS['clubinfo']) - 1);
+		return (isset($GLOBALS['param']['club']) && $GLOBALS['param']['club'] > 0 && $GLOBALS['param']['club'] < sizeof($GLOBALS['clubinfo'])) ? $GLOBALS['param']['club'] : $GLOBALS['g']->random(1, sizeof($GLOBALS['clubinfo']) - 1);
 	}
 	
 	public function game_forbid_area()
@@ -404,7 +405,7 @@ class game_dtsp extends game_bra
 			case 'aya_ridicule':
 				$attacker = '<span class="username">'.$args['attacker'].'</span>';
 				$defender = '<span class="username">'.$args['defender'].'</span>';
-				switch(random(0,4)){
+				switch($GLOBALS['g']->random(0,4)){
 					case 0:
 						$rhetoric = '<span class="username">'.$defender.'</span>惨遭重创';
 						break;

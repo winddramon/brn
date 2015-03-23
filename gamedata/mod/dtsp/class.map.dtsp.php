@@ -77,7 +77,7 @@ class map_dtsp		//把gameinfo的动态地图数据和init.maps.php里的静态�
 						$mdata = $this->mapinfo_by_id[$lval];
 						$i = 0;
 						do{
-							$mcoor = random(0,$map_size[0]).'-'.random(0,$map_size[1]);
+							$mcoor = $GLOBALS['g']->random(0,$map_size[0]).'-'.$GLOBALS['g']->random(0,$map_size[1]);
 							if($i >= 1000){throw_error('Initiating maps failed.');}
 							$i++;
 						}while(in_array($mcoor, $map_coordinates));

@@ -39,14 +39,14 @@ function init_join(param){
 	var avatar_dir = param["avatar_dir"];
 	
 	$("#F-enter-form .icon-selector select").change(function(){
-		gender = $("#F-enter-form input[name='gender']:checked").val();
-		icon = $(this).children('option:selected').val();
+		var gender = $("#F-enter-form input[name='gender']:checked").val();
+		var icon = $(this).children('option:selected').val();
 		enter_change_avatar(gender, icon, avatar_dir);
 	});
 	
 	$("#F-enter-info input[type='radio']").change(function(){
-		gender = $(this).val();
-		icon = $("#F-enter-form .icon-selector select#F-enter-form-icon-"+gender).children('option:selected').val();
+		var gender = $(this).val();
+		var icon = $("#F-enter-form .icon-selector select#F-enter-form-icon-"+gender).children('option:selected').val();
 		enter_change_avatar(gender, icon, avatar_dir);
 		switch(gender){
 			case "f":
@@ -73,8 +73,8 @@ function init_join(param){
 	
 	$("#F-enter-form").submit(function(e){
 		e.preventDefault();
-		gender = $("#F-enter-form input[name='gender']:checked").val();
-		icon = $("#F-enter-form .icon-selector select#F-enter-form-icon-"+gender).children('option:selected').val();
+		var gender = $("#F-enter-form input[name='gender']:checked").val();
+		var icon = $("#F-enter-form .icon-selector select#F-enter-form-icon-"+gender).children('option:selected').val();
 		request('enter_game', {
 			icon : icon,
 			gender : gender,
@@ -104,7 +104,6 @@ function parse_item(div, item, type){
 	}else{
 		div.html('<div class="null">无'+type+'</div>');
 	}
-	return;
 }
 
 function respond(data){
@@ -115,8 +114,8 @@ function respond(data){
 	
 	for(var aid in data){
 		
-		action = data[aid]["action"];
-		param = data[aid]["param"];
+		var action = data[aid]["action"];
+		var param = data[aid]["param"];
 		
 		switch(action){
 			
@@ -327,7 +326,7 @@ function respond(data){
 				update_price();
 				
 				$("#F-console-shop .goods button[action='add']").click(function(e){
-					input = $(this).parent().find("input");
+					var input = $(this).parent().find("input");
 					if(parseInt(input.val()) < parseInt(input.attr("max"))){
 						input.val(parseInt(input.val()) + 1);
 					}
@@ -335,7 +334,7 @@ function respond(data){
 				});
 				
 				$("#F-console-shop .goods button[action='cut']").click(function(e){
-					input = $(this).parent().find("input");
+					var input = $(this).parent().find("input");
 					if(parseInt(input.val()) > 0){
 						input.val(parseInt(input.val()) - 1);
 					}
@@ -344,7 +343,7 @@ function respond(data){
 				
 				$("#F-console-shop .goods .item").mousewheel(function(e, delta){
 					e.preventDefault();
-					input = $(this).find("input");
+					var input = $(this).find("input");
 					if(delta > 0){
 						if(parseInt(input.val()) < parseInt(input.attr("max"))){
 							input.val(parseInt(input.val()) + 1);
@@ -422,6 +421,7 @@ function respond(data){
 			
 			case 'currency':
 				UIconfig['currency'] = param['name'];
+                $("#F-console-playerinfo .infodetail .currency").html(param['name'] + "：");
 				break;
 			
 			case 'need_login':
@@ -442,7 +442,7 @@ function respond(data){
 			
 			case 'performance':
 				show_performance = true;
-				process_msec = parseInt(param['process_sec'] * 1000);
+				var process_msec = parseInt(param['process_sec'] * 1000);
 				break;
 				
 			default:
@@ -576,7 +576,7 @@ function init_gameUI(){
 	
 	//Team
 	$("#F-console-teaminfo button").click(function(e){
-		action = $(this).attr("action");
+		var action = $(this).attr("action");
 		switch(action){
 			case 'create':
 			case 'join':
@@ -615,7 +615,7 @@ function init_gameUI(){
 	
 	$("#F-console-chat-form").submit(function(e){
 		e.preventDefault();
-		chat_content = $("#F-console-chat-input").val();
+		var chat_content = $("#F-console-chat-input").val();
 		$("#F-console-chat-input").val("");
 		request("chat_send", { content : chat_content });
 	});
