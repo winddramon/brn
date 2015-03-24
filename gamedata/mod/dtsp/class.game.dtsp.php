@@ -177,9 +177,9 @@ class game_dtsp extends game_bra
 
 	protected function new_joined_player()
 	{
-		//$player = parent::new_player();
-		$player = game::new_joined_player();
-		$player['exp'] = $GLOBALS['gameinfo']['round'] * 75;
+		$player = parent::new_player();
+		//$player = game::new_joined_player();
+		//$player['exp'] = $GLOBALS['gameinfo']['round'] * 75;
 		return $player;
 	}
 	
