@@ -556,7 +556,7 @@ class combat_dtsp extends combat_bra
 		if(isset($this->attacker->equipment['wep']['sk']['atk-pierce'])){
 			$atk_pierce_rate = $this->attacker->equipment['wep']['sk']['atk-pierce'];
 		}
-		if(!determine($atk_pierce_rate)){//无贯穿或者贯穿失效才判断防具效果
+		if(!$GLOBALS['g']->determine($atk_pierce_rate)){//无贯穿或者贯穿失效才判断防具效果
 			//盾牌效果
 			if(isset($this->defender->equipment['ara']['sk']['shield'])){
 				if($GLOBALS['g']->determine($this->defender->equipment['ara']['sk']['shield'])){

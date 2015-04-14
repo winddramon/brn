@@ -3,17 +3,40 @@
 class game_dtsp extends game_bra
 {	
 	/**
-	 * 游戏类的初始化函数
-	 * 构造函数结束后游戏会载入本地设置，载入完成后才调用此函数
+	 * 游戏类的构造函数
+	 * 会载入gameinfo
+	 * 会载入gamesettings
 	 * 会在此做出游戏开始与结束的判定（只有全灭结局会在此做出结束判定）
-	 * 为了增加全局地图实例$m而继承此方法
 	 */
-	public function _construct()
+	public function __construct()
 	{
+		$this->gameinfo = $this->gameinfo_bak = $this->get_gameinfo(); //初始化并备份gameinfo，脚本结束时如果检测到没有更改就不会更新gameinfo
+		$GLOBALS['gameinfo'] = &$this->gameinfo; //兼容老代码
+		$this->players = array(); //初始化玩家池
+		$this->db = $GLOBALS['db']; //引用db类，在摧毁类时有依赖（如果db类先被摧毁会导致无法更新数据库）
+
+		//Load local settings
+		$s_cache = cache_read('localsettings.'.$this->gameinfo['settings'].'.serialize');
+		if(false !== $s_cache){
+			$a_cache = unserialize($s_cache);
+		}else{
+			$result = $this->db->select('gamesettings', array('settings'), array('name' => $this->gameinfo['settings']));
+			if(!is_array($result)){
+				throw_error('Failed to access to gamesettings.');
+				exit();
+			}
+			$a_cache = $result[0]['settings'];
+			cache_write('localsettings.'.$this->gameinfo['settings'].'.serialize', serialize($result[0]['settings']));
+		}
+		unset($s_cache);
+		foreach($a_cache as $key => $value){
+			$GLOBALS[$key] = $value;
+		}
+		
 		global $m;
 		
 		$gameinfo = &$this->gameinfo;
-		$m = new map_dtsp;
+		$m = new map_dtsp($this);
 		
 		if(($gameinfo['gamestate'] & GAME_STATE_START) === 0){
 			if($gameinfo['starttime'] < time()){

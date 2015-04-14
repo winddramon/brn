@@ -5,13 +5,15 @@ class map_dtsp		//把gameinfo的动态地图数据和init.maps.php里的静态�
 	protected $data_by_coordinate = array();
 	protected $mapinfo_by_id = array();
 	protected $regioninfo_by_id = array();
+	protected $game;
 
-	public function __construct()
+	public function __construct($g)
 	{
-		global $g;
+		//global $g;
+		$this->game = $g;
 		$this->parse_regioninfo_by_id();
 		$this->parse_mapinfo_by_id();
-		$this->init($g->gameinfo['maplist']);
+		$this->init($this->game->gameinfo['maplist']);
 		//file_put_contents('a.txt',$this->mapinfo_by_id[11]);
 		return;
 	}
@@ -77,7 +79,7 @@ class map_dtsp		//把gameinfo的动态地图数据和init.maps.php里的静态�
 						$mdata = $this->mapinfo_by_id[$lval];
 						$i = 0;
 						do{
-							$mcoor = $GLOBALS['g']->random(0,$map_size[0]).'-'.$GLOBALS['g']->random(0,$map_size[1]);
+							$mcoor = $this->game->random(0,$map_size[0]).'-'.$this->game->random(0,$map_size[1]);
 							if($i >= 1000){throw_error('Initiating maps failed.');}
 							$i++;
 						}while(in_array($mcoor, $map_coordinates));
@@ -98,7 +100,6 @@ class map_dtsp		//把gameinfo的动态地图数据和init.maps.php里的静态�
 	}
 	
 	public function update(){
-		global $g;
 		$maplist = Array();
 		foreach($this->allget() as $mval){
 			$maplist[] = Array(
@@ -106,7 +107,7 @@ class map_dtsp		//把gameinfo的动态地图数据和init.maps.php里的静态�
 				'c' => $mval['c']
 			);
 		}
-		$g->gameinfo['maplist'] = $maplist;
+		$this->game->gameinfo['maplist'] = $maplist;
 		return;
 	}
 
