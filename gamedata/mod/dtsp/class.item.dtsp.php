@@ -10,10 +10,8 @@ class item_dtsp extends item_bra
 		switch($k[0]){
 			case 'S':
 				if($k[1] == 'W'){
-					$success = $this->player->attack_by_weapon($this->data, false, true);
-					if($success){
-						$this->consume(1);
-					}
+					$this->player->attack_by_weapon($this->data, false, true);
+					$this->consume(1);
 				}else if($k[1] == 'Y'){
 					$this->special($param);
 				}
@@ -28,6 +26,7 @@ class item_dtsp extends item_bra
 	
 	public function consume($num = 0, $rearrange = true)
 	{
+		global $g;
 		if($num == 0 && $this->data['k'] == 'WG'){
 			foreach($this->player->buff as &$buff){
 				switch($buff['type']){
@@ -51,7 +50,7 @@ class item_dtsp extends item_bra
 					//十六夜套五件效果
 					case 'sakuya_suit':
 						if($buff['param']['quantity'] >= 5){
-							if($GLOBALS['g']->determine(15)){
+							if($g->determine(15)){
 								$this->player->notice('回收了 '.$this->data['n']);
 								return;
 							}
@@ -85,6 +84,7 @@ class item_dtsp extends item_bra
 	
 	protected function special($param)
 	{
+		global $g;
 		if($this->data['k'] === 'YU'){
 			do{
 				$this->apply_upgrade();
@@ -135,12 +135,12 @@ class item_dtsp extends item_bra
 				break;
 			
 			case '结界解除钥匙':
-				$GLOBALS['g']->game_end('eliminate', $this->player->_id);
+				$g->game_end('eliminate', $this->player->_id);
 				return true;
 				break;
 			
 			case '虚拟结界Bug':
-				$GLOBALS['g']->game_end('destory', $this->player->_id);
+				$g->game_end('destory', $this->player->_id);
 				return true;
 				break;
 			
@@ -304,10 +304,11 @@ class item_dtsp extends item_bra
 	
 	protected function apply_upgrade()
 	{
+		global $a,$g;
 		$up = $this->data['e'];
-		$uphp = $GLOBALS['g']->random(0, $up);
-		$upatt = $GLOBALS['g']->random(0, $up);
-		$updef = $GLOBALS['g']->random(0, $up);
+		$uphp = $g->random(0, $up);
+		$upatt = $g->random(0, $up);
+		$updef = $g->random(0, $up);
 		
 		$log = '【命】+'.$uphp.' 【攻】+'.$upatt.' 【防】+'.$updef;
 		
@@ -318,12 +319,13 @@ class item_dtsp extends item_bra
 		$this->player->calculate_battle_info();
 		$this->player->feedback('使用了'.$this->data['n'].'，浑身清爽。'.$log);
 		
-		$GLOBALS['a']->action('max_health', array('mhp' => $this->player->mhp, 'msp' => $this->player->msp));
+		$a->action('max_health', array('mhp' => $this->player->mhp, 'msp' => $this->player->msp));
 	}
 	
 	protected function apply_summon()
 	{
-		$npc = $GLOBALS['g']->summon_npc($this->data['sk']['id']);
+		global $g;
+		$npc = $g->summon_npc($this->data['sk']['id']);
 		
 		$this->player->feedback($this->data['n'].' 消失了');
 		$this->player->notice($GLOBALS['map'][$npc['area']].' 传来了奇怪的声音');
@@ -377,12 +379,13 @@ class item_dtsp extends item_bra
 	
 	protected function apply_hacker()
 	{
+		global $g,$a;
 		if($this->data['s'] == 0){
 			$this->player->error($this->data['n'].' 没能量了，无法使用', false);
 			return false;
 		}
 		
-		if($GLOBALS['g']->determine(in_array('Hacker', $this->player->skill) ? 95 :50)){
+		if($g->determine(in_array('Hacker', $this->player->skill) ? 95 :50)){
 			global $m;
 			$all_map = array();
 			$target_map = array();
@@ -393,9 +396,9 @@ class item_dtsp extends item_bra
 				}
 			}
 			
-			$GLOBALS['g']->gameinfo['forbiddenlist'] = array();
-			$GLOBALS['g']->moving_NPC($all_map, $target_map);
-			$GLOBALS['a']->action('area_info', $GLOBALS['g']->get_areainfo(), true);
+			$g->gameinfo['forbiddenlist'] = array();
+			$g->moving_NPC($all_map, $target_map);
+			$a->action('area_info', $g->get_areainfo(), true);
 			$this->player->feedback('结界中和完毕，禁区解开了！');
 		}else{
 			$this->player->feedback('结界中和失败了');
@@ -406,10 +409,11 @@ class item_dtsp extends item_bra
 	
 	protected function apply_weatherod()
 	{
-		$weather = $GLOBALS['g']->random(0, sizeof($GLOBALS['weatherinfo']) - 1);
-		$GLOBALS['g']->gameinfo['weather'] = $weather;
+		global $g;
+		$weather = $g->random(0, sizeof($GLOBALS['weatherinfo']) - 1);
+		$g->gameinfo['weather'] = $weather;
 		$this->player->feedback('天候棒使用成功，天气变成了'.$GLOBALS['weatherinfo'][$weather]);
-		$GLOBALS['a']->action('weather', array('name' => $GLOBALS['weatherinfo'][$weather]), true);
+		$g->action('weather', array('name' => $GLOBALS['weatherinfo'][$weather]), true);
 		return true;
 	}
 	
@@ -422,7 +426,7 @@ class item_dtsp extends item_bra
 		$this->player->data['equipment']['arb']['sk']['anti-'.$kind] = $effect;
 		return true;
 	}
-	
+
 	protected function apply_moe()
 	{
 		foreach($this->player->proficiency as &$pro){
@@ -430,122 +434,122 @@ class item_dtsp extends item_bra
 		}
 		$this->player->feedback('你感受到了'.$this->data['n'].'的精华，各项熟练度提高了！');
 		$this->player->ajax('proficiency', array('proficiency' => $this->player->proficiency));
-		
+
 		return true;
 	}
-	
+
 	protected function apply_package_amplifier($duration, $ettect)
 	{
 		$this->player->buff('extra_package', $duration, array('effect' => $ettect));
 		$this->player->feedback('使用 '.$this->data['n'].' 成功，背包容量增加了 '.$ettect);
 		return true;
 	}
-	
+
 	protected function apply_att_buff($duration, $ettect)
 	{
 		$this->player->buff('att_buff', $duration, array('effect' => $ettect));
 		$this->player->feedback('使用 '.$this->data['n'].' 成功，攻击力增加了 '.$ettect);
 		return true;
 	}
-	
+
 	protected function apply_def_buff($duration, $ettect)
 	{
 		$this->player->buff('def_buff', $duration, array('effect' => $ettect));
 		$this->player->feedback('使用 '.$this->data['n'].' 成功，防御力增加了 '.$ettect);
 		return true;
 	}
-	
+
 	protected function apply_recover_hp_buff($duration, $ettect, $interrupt)
 	{
 		$this->player->buff('recover_hp', $duration, array('effect' => $ettect, 'interrupt' => $interrupt));
 		$this->player->feedback('使用 '.$this->data['n'].' 成功，正在高速回复生命中');
 		return true;
 	}
-	
+
 	protected function apply_recover_sp_buff($duration, $ettect, $interrupt)
 	{
 		$this->player->buff('recover_sp', $duration, array('effect' => $ettect, 'interrupt' => $interrupt));
 		$this->player->feedback('使用 '.$this->data['n'].' 成功，正在高速回复体力中');
 		return true;
 	}
-	
+
 	protected function apply_invincible_potion($duration)
 	{
 		$this->player->buff('invincible', $duration);
 		$this->player->feedback('使用 '.$this->data['n'].' 成功，进入霸体状态');
 		return true;
 	}
-	
+
 	protected function apply_royal_flare()
 	{
 		$players_data = $GLOBALS['db']->select('players', '*', array('type' => GAME_PLAYER_USER, 'hp' => array('$gt' => 0)));
-		
+
 		foreach($players_data as &$player_data){
 			if($player_data['uid'] == $this->player->uid){
 				continue; //地图炮不伤害玩家自身
 			}
-			
+
 			$player = new_player($player_data);
-			
+
 			if(false === $player->is_alive()){
 				continue; //地图炮不打死人
 			}
-			
+
 			$damage = $player->damage(100, array('pid' => $this->player->_id, 'weapon' => $this->data['n'], 'type' => 'weapon_d'));
 			$player->feedback('你被 '.$this->data['n'].' 击中，造成 '.$damage.'点伤害');
 		}
-		
+
 		$this->player->feedback('发动 '.$this->data['n'].' 中，整个天空闪耀着炽烈的光芒，灼烧着大地');
-		
+
 		return true;
 	}
-	
+
 	protected function apply_silent_serena()
 	{
 		$players_data = $GLOBALS['db']->select('players', '*', array('area' => $this->player->area, 'hp' => array('$gt' => 0)));
-		
+
 		foreach($players_data as &$player_data){
 			if($player_data['uid'] == $this->player->uid){
 				continue; //地图炮不伤害玩家自身
 			}
-			
+
 			$player = new_player($player_data);
-			
+
 			if(false === $player->is_alive()){
 				continue; //地图炮不打死人
 			}
-			
+
 			$damage = $player->damage(100, array('pid' => $this->player->_id, 'weapon' => $this->data['n'], 'type' => 'weapon_d'));
 			$player->feedback('你被 '.$this->data['n'].' 击中，造成 '.$damage.'点伤害');
-			
+
 		}
-		
+
 		$this->player->feedback('发动 '.$this->data['n'].' 中，整个天空充斥着静谧却致命的白光');
-		
+
 		return true;
 	}
-	
-	protected function apply_shield($duration, $ettect)
+
+	protected function apply_shield($duration, $amount, $effect)
 	{
 		$this->player->buff('shield', $duration, array('amount' => $amount, 'effect' => $effect));
 		$this->player->feedback('使用 '.$this->data['n'].' 成功，如有神护');
 		return true;
 	}
-	
+
 	protected function apply_infrared_moon()
 	{
 		$this->player->buff('infrared_moon', 120);
 		$this->player->feedback('发动 '.$this->data['n'].' 成功，现在敌人无法瞄准你了');
 		return true;
 	}
-	
+
 	protected function apply_ultrashort_EEG()
 	{
 		$this->player->buff('ultrashort_EEG', 120);
 		$this->player->feedback('发动 '.$this->data['n'].' 成功，你的幻影获得了实体');
 		return true;
 	}
-	
+
 	protected function apply_gas_woven_orb()
 	{
 		$players_data = $GLOBALS['db']->select('players', '*', array('type' => GAME_PLAYER_USER, 'hp' => array('$gt' => 0)));

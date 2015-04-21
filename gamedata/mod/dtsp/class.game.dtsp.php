@@ -8,7 +8,7 @@ class game_dtsp extends game_bra
 	 * 会载入gamesettings
 	 * 会在此做出游戏开始与结束的判定（只有全灭结局会在此做出结束判定）
 	 */
-	public function __construct()
+	public function initialize()
 	{
 		$this->gameinfo = $this->gameinfo_bak = $this->get_gameinfo(); //初始化并备份gameinfo，脚本结束时如果检测到没有更改就不会更新gameinfo
 		$GLOBALS['gameinfo'] = &$this->gameinfo; //兼容老代码
@@ -64,15 +64,10 @@ class game_dtsp extends game_bra
 	 * 游戏结束时（所有结局）会调用的函数
 	 * 进行各种初始化动作，为新一局的游戏创建全新的数据库，清空缓存与推送池
 	 * 为使下一局游戏的时间变更而重载此函数
-	 *
-	 * @param string 游戏结局
-	 * @param player|array $winner 胜利者player对象（可以是数组也可以是单个对象）
-	 * @param string $mode 胜利方式（团队或个人）
-	 * @return array 胜利玩家的id
 	 */
 	public function game_end($type = 'timeup', $winners = array(), $mode = 'team') //TODO: 发送推送消息（剧情）
 	{
-		global $gameinfo, $db, $p, $game_interval;
+		global $gameinfo, $db, $a, $game_interval;
 		
 		if(is_array($winners) === false){
 			$winners = array($winners);
@@ -138,7 +133,7 @@ class game_dtsp extends game_bra
 
 		$this->insert_news('end');
 		
-		$GLOBALS['a']->action('end', array(), true);
+		$a->action('end', array(), true);
 		
 		$news = $db->select('news', array('time', 'content'));
 
@@ -372,7 +367,7 @@ class game_dtsp extends game_bra
 	
 	public function insert_news($type, $args = array())
 	{
-		
+		global $a, $g;
 		$content = '';
 		switch($type){
 			case 'end_info':
@@ -428,7 +423,7 @@ class game_dtsp extends game_bra
 			case 'aya_ridicule':
 				$attacker = '<span class="username">'.$args['attacker'].'</span>';
 				$defender = '<span class="username">'.$args['defender'].'</span>';
-				switch($GLOBALS['g']->random(0,4)){
+				switch($g->random(0,4)){
 					case 0:
 						$rhetoric = '<span class="username">'.$defender.'</span>惨遭重创';
 						break;
@@ -459,7 +454,7 @@ class game_dtsp extends game_bra
 			default:
 				$content =  parent::insert_news($type, $args);
 				if($type != 'damage'){
-					$GLOBALS['a']->action('chat_msg', array('msg' => $content, 'time' => time()), true);
+					$a->action('chat_msg', array('msg' => $content, 'time' => time()), true);
 				}
 				return $content;
 				break;
@@ -469,7 +464,7 @@ class game_dtsp extends game_bra
 		$db->insert('news', array('time' => time(), 'content' => $content));
 		
 		if($type != 'damage'){
-			$GLOBALS['a']->action('chat_msg', array('msg' => $content, 'time' => time()), true);
+			$a->action('chat_msg', array('msg' => $content, 'time' => time()), true);
 		}
 		
 		$this->update_news_cache();
