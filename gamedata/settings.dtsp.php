@@ -29,7 +29,7 @@ $avatar_dir = 'dtsp';
 
 
 $last_stand = array(
-	'win' => 30//独存胜利的时间
+	'win' => 300//独存胜利的时间
 );
 
 //禁区时间（秒）

@@ -59,6 +59,10 @@ class player_dtsp extends player_bra
 			$data['area'] = $destination;
 			$data['region'] = $dregion;
 			$this->feedback('移动到了 '.$mapname);
+			if(isset($this->data['action']['battle'])){
+				unset($this->data['action']['battle']);
+				$this->error('移动前遇敌已放弃');
+			}
 			$this->ajax('location', array('name' => $mapname, 'shop' => in_array(intval($data['area']), $shopmap, true)));
 			if(!$ignore_search){
 				$this->discover('move');
