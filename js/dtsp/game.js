@@ -238,9 +238,9 @@ function respond(data){
 			case 'weather':
 				$("#F-console-weather").html(param['name']);
 				break;
-				
 			case 'location':
 				$("#F-console-area").html(param['name']);
+				$("#F-consol-map-background").attr("src",param['background']);
 				if(param['shop']){
 					$("#F-console-panel-shop").slideDown(200);
 				}else{

@@ -7,9 +7,9 @@ class map_dtsp		//把gameinfo的动态地图数据和init.maps.php里的静态�
 	protected $regioninfo_by_id = array();
 	protected $game;
 
-	public function __construct($g)
+	public function __construct()
 	{
-		//global $g;
+		global $g;
 		$this->game = $g;
 		$this->parse_regioninfo_by_id();
 		$this->parse_mapinfo_by_id();

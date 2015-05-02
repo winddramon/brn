@@ -17,7 +17,7 @@ class player_dtsp extends player_bra
 			return $this->error('你已经死了');
 		}
 		
-		global $g, $m, $shopmap, $last_stand;
+		global $g, $m, $shopmap, $last_stand, $img_dir;
 		$data = &$this->data;
 		$destination = intval($destination);
 		$final_region = $m->ritget('end', 'id');
@@ -63,7 +63,7 @@ class player_dtsp extends player_bra
 				unset($this->data['action']['battle']);
 				$this->error('移动前遇敌已放弃');
 			}
-			$this->ajax('location', array('name' => $mapname, 'shop' => in_array(intval($data['area']), $shopmap, true)));
+			$this->ajax('location', array('name' => $mapname,'background' => 'img/'.$img_dir.'/'.$m->riiget($this->region,'background'), 'shop' => in_array(intval($data['area']), $shopmap, true)));
 			if(!$ignore_search){
 				$this->discover('move');
 			}

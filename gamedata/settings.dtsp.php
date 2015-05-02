@@ -27,6 +27,8 @@ $template_name = 'dtsp';
 //头像文件夹
 $avatar_dir = 'dtsp';
 
+//图像文件夹
+$img_dir = 'dtsp';
 
 $last_stand = array(
 	'win' => 300//独存胜利的时间

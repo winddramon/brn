@@ -36,7 +36,7 @@ class game_dtsp extends game_bra
 		global $m;
 		
 		$gameinfo = &$this->gameinfo;
-		$m = new map_dtsp($this);
+		$m = new map_dtsp();
 		
 		if(($gameinfo['gamestate'] & GAME_STATE_START) === 0){
 			if($gameinfo['starttime'] < time()){
