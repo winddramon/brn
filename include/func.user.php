@@ -5,7 +5,7 @@ function login($username, $password, $encoded = false)
 	global $db;
 	
 	if(false === $encoded){
-		$password = encode_password($password);
+		$password = encode_password($username,$password);
 	} 
 	
 	$condition = array('username' => $username);
@@ -59,8 +59,8 @@ function current_user()
 	}
 }
 
-function encode_password($password){
-	return md5($password);
+function encode_password($username, $password){
+	return md5(md5($username).$password);
 }
 
 ?>

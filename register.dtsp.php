@@ -20,7 +20,7 @@ if(isset($_POST['username'])){
 			if($users === false){
 				$db->insert('users', array(
 					'username' => $username,
-					'password' => encode_password($password),
+					'password' => encode_password($username,$password),
 					'groupid' => 0,
 					'lastgame' => 0,
 					'ip' => real_ip(),
