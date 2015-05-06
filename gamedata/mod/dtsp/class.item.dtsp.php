@@ -293,7 +293,7 @@ class item_dtsp extends item_bra
 		}
 		$region = $this->data['sk']['region'];
 		$destination = $m->get_region_access($region);
-		$mapname = $m->iget($destination);
+//		$mapname = $m->ar($destination);
 		$this->player->feedback('你使用了'.$this->data['n'].'，跨越了区域的限制。');
 		$this->player->move($destination, true, true);
 //		$this->player->area = $destination;
@@ -389,10 +389,10 @@ class item_dtsp extends item_bra
 			global $m;
 			$all_map = array();
 			$target_map = array();
-			foreach($m->allget() as $mval){
-				$all_map[] = $mval['id'];
-				if($mval['id'] !== 1){
-					$target_map[] = $mval['id'];
+			foreach($m->ar() as $mid){
+				$all_map[] = $mid;
+				if($mid !== 1){
+					$target_map[] = $mid;
 				}
 			}
 			

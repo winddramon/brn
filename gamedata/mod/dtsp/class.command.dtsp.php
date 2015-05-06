@@ -40,7 +40,7 @@ class command_dtsp extends command_bra
 				$a->action('proficiency', array('proficiency' => $cplayer->proficiency));
 				$a->action('money', array('money' => $cplayer->money));
 				$a->action('area_info', $GLOBALS['g']->get_areainfo());
-				$a->action('location', array('name' => $m->iget($cplayer->area),'background' => 'img/'.$img_dir.'/'.$m->riiget($cplayer->region,'background'), 'shop' => in_array(intval($cplayer->area), $GLOBALS['shopmap'], true)));
+				$a->action('location', array('name' => $m->ar('_id',$cplayer->area)->n,'background' => 'img/'.$img_dir.'/'.$m->rg('_id',$cplayer->region)->background, 'shop' => in_array(intval($cplayer->area), $GLOBALS['shopmap'], true)));
 				$a->action('weather', array('name' => $GLOBALS['weatherinfo'][$GLOBALS['gameinfo']['weather']]));
 				$a->action('item', array('equipment' => $cplayer->parse_equipment(), 'package' => $cplayer->parse_package(), 'capacity' => intval($cplayer->capacity)));
 				$a->action('buff_name', $GLOBALS['buff_name']);

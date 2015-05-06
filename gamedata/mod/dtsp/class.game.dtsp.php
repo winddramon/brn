@@ -36,7 +36,7 @@ class game_dtsp extends game_bra
 		global $m;
 		
 		$gameinfo = &$this->gameinfo;
-		$m = new map_dtsp();
+		$m = new map_container_dtsp();
 		
 		if(($gameinfo['gamestate'] & GAME_STATE_START) === 0){
 			if($gameinfo['starttime'] < time()){
@@ -48,7 +48,7 @@ class game_dtsp extends game_bra
 		
 		while($gameinfo['areatime'] <= time() && ($gameinfo['gamestate'] & GAME_STATE_START)){
 			$areanum = $this->game_forbid_area();
-			if($areanum >= sizeof($m->allget())){
+			if($areanum >= sizeof($m->ar())){
 				if($this->gameinfo['validnum'] == 0){
 					$this->game_end('noplayer');
 				}else{
@@ -234,9 +234,8 @@ class game_dtsp extends game_bra
 		$message = '
 <p class="welcome">
 <img border="0" src="img/i_hayashida.gif" width="70" height="70"><br /><br />
-<font color="#ff0000" face="verdana" size="6">
 <span id="br" style="width:100%;filter:blur(add=1,direction=135,strength=9):glow(strength=5,color=gold); font-weight:700; text-decoration:underline">
-■ BATTLE ROYALE ■</span></font><br>
+■ BATTLE ROYALE ■</span><br>
 
 任务目标：抵达最终战场并坚持5分钟！<br>
 <br>
@@ -255,7 +254,7 @@ class game_dtsp extends game_bra
 	protected function generate_forbidden_sequence()
 	{
 		global $m;
-		$arealist = $m->allget(true);
+		$arealist = $m->ar();
 		shuffle($arealist);
 		$arealist[array_search(0,$arealist)] = $arealist[0];
 		$arealist[0] = 0;
@@ -309,8 +308,7 @@ class game_dtsp extends game_bra
 		$forbidden = $this->gameinfo['forbiddenlist'];
 		$safe = array();
 		$all = array();
-		foreach($m->allget() as $mval){
-			$i = $mval['id'];
+		foreach($m->ar() as $i){
 			if(false === in_array($i, $forbidden)){
 				$safe[] = $i;
 			}
@@ -332,7 +330,7 @@ class game_dtsp extends game_bra
 							if($buff['param']['quantity'] >= 3){
 								$player->notice('八云紫的力量让你躲避了禁区死亡');
 								$player->data['area'] = $safe[array_rand($safe)];
-								$player->ajax('location', array('name' => $m->iget($player->data['area']), 'shop' => in_array(intval($player->data['area']), $GLOBALS['shopmap'], true)));
+								$player->ajax('location', array('name' => $m->ar($player->data['area'])->n, 'shop' => in_array(intval($player->data['area']), $GLOBALS['shopmap'], true)));
 								continue 2; //自动躲避禁区
 							}
 							
@@ -341,7 +339,7 @@ class game_dtsp extends game_bra
 							if($buff['param']['quantity'] >= 3){
 								$player->notice('毛玉的力量让你躲避了禁区死亡');
 								$player->data['area'] = $safe[array_rand($safe)];
-								$player->ajax('location', array('name' => $m->iget($player->data['area']), 'shop' => in_array(intval($player->data['area']), $GLOBALS['shopmap'], true)));
+								$player->ajax('location', array('name' => $m->ar('_id',$player->data['area'])->n, 'shop' => in_array(intval($player->data['area']), $GLOBALS['shopmap'], true)));
 								continue 2; //自动躲避禁区
 							}
 						
@@ -506,7 +504,7 @@ class game_dtsp extends game_bra
 		$gameinfo['gamestate'] = 0;
 		
 		/*===================Maps Initialization==================*/
-		$m->reload();	
+		$m->reset_active();
 		
 		/*==================Shops Initialization==================*/
 		$column = file_get_contents('gamedata/sql/shop.sql');
@@ -575,7 +573,7 @@ class game_dtsp extends game_bra
 		if(!$fp){
 			throw_error('Failed to open data file.');
 		}
-		$alllist = $m->allget(true);//TODO:编号为0的区域应该排除
+		$alllist = $m->ar();//TODO:编号为0的区域应该排除
 		
 		$data = array();
 		while(!feof($fp)){
@@ -632,7 +630,7 @@ class game_dtsp extends game_bra
 	
 	function check_all_laststand($cplayer = false){
 		global $db, $g, $m;
-		$final_region = $m->ritget('end', 'id');
+		$final_region = $m->rg('type','end')->_id;
 		if($cplayer){//如果传参则单独判定$cplayer防止忽略缓存
 			$llist = $db->select('players', '_id', array('_id' =>array('$ne' => $cplayer->_id), 'type' => GAME_PLAYER_USER, 'region' => $final_region, 'hp' => array('$gt' => 0)));
 			if($cplayer->region == $final_region){

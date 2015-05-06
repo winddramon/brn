@@ -20,7 +20,7 @@ class player_dtsp extends player_bra
 		global $g, $m, $shopmap, $last_stand, $img_dir;
 		$data = &$this->data;
 		$destination = intval($destination);
-		$final_region = $m->ritget('end', 'id');
+		$final_region = $m->rg('type','end')->_id;
 		if($data['action'] && isset($data['action']['battle'])){
 			$this->error('战斗中，无法移动');
 		}
@@ -34,12 +34,12 @@ class player_dtsp extends player_bra
 			$this->search();
 		}else{
 			
-			$mapname = $m->iget($destination);
+			$mapname = $m->ar('_id',$destination)->n;
 			if(!$mapname){
 				$this->error('无效的目的地');
 			}
-			$dregion = $m->iget($destination, 'r');
-			if($m->iget(intval($data['area']), 'r') !== $dregion && !$across_regions && $m->riiget($this->region, 'type') != 'start'){
+			$dregion = $m->ar('_id',$destination)->r;
+			if($m->ar('_id',intval($data['area']))->r !== $dregion && !$across_regions && $m->rg('_id',$this->region)->type != 'start'){
 				$this->error('无法跨区移动');
 			}
 			$status = $this->area_status($destination);
@@ -63,7 +63,7 @@ class player_dtsp extends player_bra
 				unset($this->data['action']['battle']);
 				$this->error('移动前遇敌已放弃');
 			}
-			$this->ajax('location', array('name' => $mapname,'background' => 'img/'.$img_dir.'/'.$m->riiget($this->region,'background'), 'shop' => in_array(intval($data['area']), $shopmap, true)));
+			$this->ajax('location', array('name' => $mapname,'background' => 'img/'.$img_dir.'/'.$m->rg('_id',$this->region)->background, 'shop' => in_array(intval($data['area']), $shopmap, true)));
 			if(!$ignore_search){
 				$this->discover('move');
 			}
@@ -83,8 +83,8 @@ class player_dtsp extends player_bra
 	public function search()
 	{
 		global $g, $m;
-		$final_region = $m->ritget('end', 'id');
-		$this->region = $m->iget($this->area,'r');
+		$final_region = $m->rg('type','end')->_id;
+		$this->region = $m->ar('_id',$this->area)->r;
 		parent::search();
 		if($this->region == $final_region){
 			$this->set_last_stand();
@@ -118,7 +118,7 @@ class player_dtsp extends player_bra
 		foreach($this->data['buff'] as &$buff){
 			switch($buff['type']){
 				case 'region_jump':
-					if($buff['param']['destination'] == $m->riiget($this->region, 'destination')){
+					if($buff['param']['destination'] == $m->rg('_id',$this->region)->destination){
 						$already = true;
 					}
 					break;
@@ -127,8 +127,8 @@ class player_dtsp extends player_bra
 					break;
 			}
 		}
-		if(!$already && $m->riiget($this->region, 'duration') && $m->riiget($this->region, 'destination')){
-			$this->buff('region_jump', $m->riiget($this->region, 'duration'), array('destination' => $m->riiget($this->region, 'destination')));
+		if(!$already && $m->rg('_id',$this->region)->duration && $m->rg('_id',$this->region)->destination){
+			$this->buff('region_jump', $m->rg('_id',$this->region)->duration, array('destination' => $m->rg('_id',$this->region)->destination));
 		}
 	}
 	protected function get_consumption($action)
@@ -468,14 +468,14 @@ class player_dtsp extends player_bra
 		//必须放在继承函数之后，否则诸如攻击增益的效果将计算buff取消前的数值
 		switch($buff['type']){
 			case 'last_stand':
-				global $m;
-				if($this->region == $m->ritget('end', 'id')){
-					$GLOBALS['g']->game_end('laststand', $this, 'individual');
+				global $m,$g;
+				if($this->region == $m->rg('type','end')->_id){
+					$g->game_end('laststand', $this, 'individual');
 				}
 				break;
 			case 'region_jump':
 				global $m;
-				if($buff['param']['destination'] == $m->riiget($this->region, 'destination')){//条件：所在地图的区域的目的地与buff记载的目的地相同
+				if($buff['param']['destination'] == $m->rg('_id',$this->region)->destination){//条件：所在地图的区域的目的地与buff记载的目的地相同
 					$this->move($m->get_region_access($buff['param']['destination']), true, true);
 					$this->feedback('时间到了，必须得移动了！');
 				}

@@ -1,210 +1,239 @@
 <?php
-class map_dtsp		//把gameinfo的动态地图数据和init.maps.php里的静态地图数据封装在一起
+
+class map_container_dtsp
 {
-	protected $data_by_id = array();
-	protected $data_by_coordinate = array();
-	protected $mapinfo_by_id = array();
-	protected $regioninfo_by_id = array();
-	protected $game;
+	protected $regions = array();
+	protected $areas = array();
+	protected $areas_static = array();
 
 	public function __construct()
 	{
+		$this->load_static();
+		$this->load_active();
+	}
+
+	public function load_static()
+	{//载入settings静态数据
+		global $regioninfo, $mapinfo;
+		foreach ($mapinfo as $mval) {
+			$this->areas_static[$mval['_id']] = new area_dtsp($mval);
+		}
+		foreach ($regioninfo as $rval) {
+			$this->regions[$rval['_id']] = new region_dtsp($rval);
+			foreach ($rval['group'] as $rgval) {
+				foreach ($rgval['list'] as $lval) {
+					if (isset($this->areas_static[$lval])) {
+						$this->areas_static[$lval]->r = $rval['_id'];
+					}
+				}
+			}
+		}
+	}
+
+	public function load_active($maplist = array())
+	{//把gameinfo动态数据和静态数据合并
 		global $g;
-		$this->game = $g;
-		$this->parse_regioninfo_by_id();
-		$this->parse_mapinfo_by_id();
-		$this->init($this->game->gameinfo['maplist']);
-		//file_put_contents('a.txt',$this->mapinfo_by_id[11]);
-		return;
-	}
-
-	protected function parse_mapinfo_by_id(){
-		global $mapinfo;
-		$mapinfo_by_id = array();
-		foreach($mapinfo as $mval){
-			$mapinfo_by_id[$mval['id']] = $mval;
+		if (empty($maplist)) {
+			$maplist = $g->gameinfo['maplist'];
 		}
-		foreach($this->regioninfo_by_id as $rval){
-			foreach($rval['group'] as $gval){
-				foreach($gval['list'] as $lval){
-					$mapinfo_by_id[$lval] = array_merge($mapinfo_by_id[$lval], array('r' => $rval['id']));
-				}
+		if ($maplist) {
+			$this->areas=array();
+			foreach ($maplist as $mval) {
+				$this->areas[$mval['_id']] = new area_dtsp(array_merge($this->areas_static[$mval['_id']]->data, $mval));
 			}
 		}
-
-		$this->mapinfo_by_id = $mapinfo_by_id;
-
-		return;
 	}
 
-	protected function parse_regioninfo_by_id(){
-		global $regioninfo;
-		$regioninfo_by_id = array();
-		foreach($regioninfo as $rval){
-			$regioninfo_by_id[$rval['id']] = $rval;
-		}
-		$this->regioninfo_by_id = $regioninfo_by_id;
-		return;
-	}
-	
-	public function init($maplist){//自身初始化函数，把gameinfo动态数据和init静态数据合并，并按id和坐标手动建立索引
-		$this->data_by_id = $this->data_by_coordinate = array();
-		foreach($maplist as $mval){
-			$mval = array_merge($this->mapinfo_by_id[$mval['id']],$mval);
-			$this->data_by_id[$mval['id']] = $this->data_by_coordinate[$mval['c']] = $mval;
-		}
-		return;
-	}	
-	
-	public function reload(){
-		global $map_size;
-		
+	public function reset_active()
+	{
+		global $g, $map_size;
 		$maplist = $map_coordinates = array();
-		foreach($this->regioninfo_by_id as $rval){//先把全部固定地图标注完毕
-			foreach($rval['group'] as $gval){
-				if($gval['num'] < 0){
-					foreach($gval['list'] as $lval){
-						$map_coordinates[] = $this->mapinfo_by_id[$lval]['c'];
-						$maplist[] = $this->mapinfo_by_id[$lval];
+		foreach ($this->regions as $robj) {
+			foreach ($robj->group as $rgval) {
+				if ($rgval['num'] < 0) {//先把全部固定地图标注完毕
+					foreach ($rgval['list'] as $lval) {
+						$map_coordinates[] = $this->areas_static[$lval]->c;
+						$maplist[] = $this->areas_static[$lval]->data;
 					}
 				}
 			}
 		}
-		foreach($this->regioninfo_by_id as $rval){//之后分配随机地图。这个参数是0的地图完全不放置
-			foreach($rval['group'] as $gval){
-				if($gval['num'] > 0){
-					shuffle($gval['list']);
-					$mlist = array_slice($gval['list'],0,$gval['num']);
-					foreach($mlist as $lval){
-						$mdata = $this->mapinfo_by_id[$lval];
+		foreach ($this->regions as $robj) {//之后分配随机地图。这个参数是0的地图完全不放置
+			foreach ($robj->group as $rgval) {
+				if ($rgval['num'] > 0) {
+					$list = $rgval['list'];
+					shuffle($list);
+					$mlist = array_slice($list, 0, $rgval['num']);
+					foreach ($mlist as $lval) {
+						$sub = $this->areas_static[$lval];
 						$i = 0;
-						do{
-							$mcoor = $this->game->random(0,$map_size[0]).'-'.$this->game->random(0,$map_size[1]);
-							if($i >= 1000){throw_error('Initiating maps failed.');}
+						do {
+							$mcoor = $g->random(0, $map_size[0]) . '-' . $g->random(0, $map_size[1]);
+							if ($i >= 1000) {
+								throw_error('Initiating maps failed.');
+							}
 							$i++;
-						}while(in_array($mcoor, $map_coordinates));
-						$mdata['c'] = $mcoor;
-						$map_coordinates[] = $mdata['c'];
-						$maplist[] = $mdata;
+						} while (in_array($mcoor, $map_coordinates));
+						$sub->c = $mcoor;
+						$map_coordinates[] = $sub->c;
+						$maplist[] = $sub->data;
 					}
 				}
 			}
 		}
 
+//		file_put_contents('a.txt',serialize($maplist));
+		$this->load_active($maplist);
 
-		
-		$this->init($maplist);
-		$this->update();
-		
-		return;
+		$this->set_active();
 	}
-	
-	public function update(){
-		$maplist = Array();
-		foreach($this->allget() as $mval){
-			$maplist[] = Array(
-				'id' => $mval['id'],
-				'c' => $mval['c']
-			);
+
+	public function set_active()
+	{//把动态数据写入gameinfo
+		global $g;
+		if ($this->areas) {
+			$maplist = Array();
+			foreach ($this->areas as $mobj) {
+				$maplist[] = Array(
+					'_id' => $mobj->_id,
+					'c' => $mobj->c
+				);
+			}
+			$g->gameinfo['maplist'] = $maplist;
 		}
-		$this->game->gameinfo['maplist'] = $maplist;
-		return;
 	}
 
-	/**
-	 * 按id获取地图数据值
-	 *
-	 * @param $area 传入的id
-	 * @param string $attr 要获取的键名
-	 * @return bool
-	 */
-	public function iget($area, $attr = 'n')
-	{
-		if(isset($this->data_by_id[$area][$attr])){
-			return $this->data_by_id[$area][$attr];
-		}else{
-			return false;
-		}		
-	}
-
-	/**
-	 * 按坐标获取地图数据值
-	 *
-	 * @param $coor 传入的坐标
-	 * @param string $attr 要获取的键名
-	 * @return bool
-	 */
-	public function cget($coor, $attr = 'n')
-	{
-		if(isset($this->data_by_coordinate[$coor][$attr])){
-			return $this->data_by_coordinate[$coor][$attr];
-		}else{
-			return false;
-		}		
-	}
-
-	/**
-	 * 获得所有地图数据组成的数组
-	 *
-	 * @param bool $keys 参数为true表示只获取键名即地图编号
-	 * @return array
-	 */
-	public function allget($keys = false){
-		return $keys ? array_keys($this->data_by_id) : $this->data_by_id;
-	}
-
-	/**
-	 * 计算特定区域的入口地图编号，如果该地图设定上是随机入口那么返回该区域的一个随机的地图编号
-	 *
-	 * @param $region 传入的区域编号
-	 */
-	public function get_region_access($region)
-	{
-		global $g, $m, $shopmap;
-		$destination = $this->riiget($region, 'access');
-		if(!$destination || ($destination >= 0 && !$m->iget($destination))){
-			$cplayer = $g->current_player();
-			$cplayer->error('destination:' .$destination. ' 跨区移动参数错误2');
-			return;
-		}
-		if($destination < 0){//该等级随机
-			$dlist = array();
-			foreach($m->allget() as $dval){
-				if($dval['r'] == $region){
-					$dlist[] = $dval;
+	public function ar($c = 'allkeys', $p = '')
+	{//自动识别是地图编号还是坐标，并返回地图对象
+		if ($c === 'allkeys') {
+			return array_keys($this->areas);
+		} elseif ($c === 'all') {
+			return $this->areas;
+		} elseif ($c === '_id' && is_numeric($p)) {
+			return $this->areas[$p];
+		} elseif ($c === 'c' && strpos($p,'-')!==false) {
+			foreach ($this->areas as $aobj) {
+				if ($aobj->c === $p) {
+					return $aobj;
 				}
 			}
-			shuffle($dlist);
-			$destination = $dlist[0]['id'];
-		}
-		
-		return $destination;
-	}
-
-	/**
-	 * 获得特定区域的静态数据
-	 *
-	 * @param $region 传入的区域编号
-	 * @param string $attr 要获得的区域数据
-	 * @return bool
-	 */
-	public function riiget($region, $attr = 'id'){
-		if(isset($this->regioninfo_by_id[$region][$attr])){
-			return $this->regioninfo_by_id[$region][$attr];
-		}else{
-			return false;
 		}
 	}
 
-	public function ritget($type, $attr = 'id'){
-		$regions = array();
-		foreach($this->regioninfo_by_id as $rkey => $rval){
-			if($rval['type'] == $type){
-				$regions[] = $rkey;
+	public function rg($c = 'allkeys', $p = '')
+	{
+		if ($c === 'allkeys') {
+			return array_keys($this->regions);
+		} elseif ($c === 'all') {
+			return $this->regions;
+		} elseif ($c === '_id' && is_numeric($p)) {
+			return $this->regions[$p];
+		} elseif ($c === 'type' && in_array($p, Array('start', 'normal', 'end'))) {
+			$regions = array();
+			foreach ($this->regions as $rkey => $robj) {
+				if ($robj->type == $p) {
+					$regions[] = $robj;
+				}
+			}
+			if (sizeof($regions) == 0) {
+				return false;
+			} elseif (sizeof($regions) == 1) {
+				return $regions[0];
+			} else {
+				return $regions;
 			}
 		}
-		if(sizeof($regions) == 0){return false;}
-		elseif(sizeof($regions) == 1){return $regions[0];}
-		else{return $regions;}
+	}
+
+	public function get_region_access($r)
+	{
+		return $this->rg($r)->access;
+	}
+}
+
+class area_dtsp
+{
+	protected $data;
+
+	public function __construct($data)
+	{
+		$this->data['_id'] = $data['_id'];
+		$this->data['n'] = $data['n'];
+		$this->data['c'] = isset($data['c']) ? $data['c'] : false;
+		$this->data['r'] = isset($data['r']) ? $data['r'] : false;
+	}
+
+	public function update($data)
+	{
+		if ($this->data['_id'] == $data['_id']) {
+			foreach ($data as $dkey => $dval) {
+				if ($dkey != '_id') {
+					$this->data[$dkey] = $dval;
+				}
+			}
+		}
+	}
+
+	public function &__get($p)
+	{
+		if ($p === 'data') {
+			return $this->data;
+		}
+		if (false === isset($this->data[$p])) {
+			throw_error('Undefined property in area_dtsp: ' . $p);
+
+		}
+		return $this->data[$p];
+	}
+
+	public function __set($p, $v)
+	{
+		if ($p === 'data' && is_array($v)) {
+			return $this->data = $v;
+		}
+//		if(false === isset($this->data[$p])){
+//			throw_error('Undefined property in setting area_dtsp: '.$p);
+//		}
+		return $this->data[$p] = $v;
+	}
+}
+
+class region_dtsp
+{
+	protected $data;
+
+	public function __construct($data)
+	{
+		$this->data['_id'] = $data['_id'];
+		$this->data['destination'] = $data['destination'];
+		$this->data['type'] = $data['type'];
+		$this->data['access'] = $data['access'];
+		$this->data['duration'] = $data['duration'];
+		$this->data['displaysize'] = $data['displaysize'];
+		$this->data['background'] = $data['background'];
+		$this->data['group'] = $data['group'];
+	}
+
+	public function update($data)
+	{
+	}
+
+	public function &__get($p)
+	{
+		if ($p === 'data') {
+			return $this->data;
+		}
+		if (false === isset($this->data[$p])) {
+			throw_error('Undefined property in region_dtsp: ' . $p);
+		}
+		return $this->data[$p];
+	}
+
+	public function __set($p, $v)
+	{
+		if ($p === 'data') {
+			return $this->data;
+		}
+		return $this->data[$p] = $v;
 	}
 }

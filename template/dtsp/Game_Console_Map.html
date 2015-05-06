@@ -9,10 +9,10 @@
 			for($x = 0; $x <= $map_size[0]; $x ++){
 				?><div class="map_block" mid=<?php
 				$coor = strval($x).'-'.strval($y);
-				if($GLOBALS['m']->cget($coor)){
-					$id = $GLOBALS['m']->cget($coor, 'id');
-					$name = $GLOBALS['m']->cget($coor, 'n');
-					echo $id;
+				if($GLOBALS['m']->ar('c',$coor)){
+					$_id = $GLOBALS['m']->ar('c',$coor)->_id;
+					$name = $GLOBALS['m']->ar('c',$coor)->n;
+					echo $_id;
 					?>><div><?php
 					echo $name;
 					?></div><?php
