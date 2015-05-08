@@ -145,9 +145,27 @@ class map_container_dtsp
 		}
 	}
 
-	public function get_region_access($r)
+	public function get_region_access($region)
 	{
-		return $this->rg($r)->access;
+		global $g, $m;
+		$destination = $this->rg('_id',$region)->access;
+		if(!$destination || ($destination >= 0 && !$m->ar('_id',$destination))){
+			$cplayer = $g->current_player();
+			$cplayer->error('destination:' .$destination. ' 跨区移动参数错误2');
+			return;
+		}
+		if($destination < 0){//该等级随机
+			$dlist = array();
+			foreach($m->ar('all') as $dobj){
+				if($dobj->r == $region){
+					$dlist[] = $dobj;
+				}
+			}
+			shuffle($dlist);
+			$destination = $dlist[0]->_id;
+		}
+
+		return $destination;
 	}
 }
 

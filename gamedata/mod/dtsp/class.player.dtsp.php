@@ -17,7 +17,7 @@ class player_dtsp extends player_bra
 			return $this->error('你已经死了');
 		}
 		
-		global $g, $m, $shopmap, $last_stand, $img_dir;
+		global $g, $m, $shopmap,  $img_dir;
 		$data = &$this->data;
 		$destination = intval($destination);
 		$final_region = $m->rg('type','end')->_id;
@@ -25,7 +25,7 @@ class player_dtsp extends player_bra
 			$this->error('战斗中，无法移动');
 		}
 		
-		if(isset($this->package[0])){
+		if(isset($this->package[0]) && !$across_regions){
 			$this->error('请在移动前先决定如何处理拾取到的物品');
 		}
 		
@@ -36,7 +36,7 @@ class player_dtsp extends player_bra
 			
 			$mapname = $m->ar('_id',$destination)->n;
 			if(!$mapname){
-				$this->error('无效的目的地');
+				$this->error('无效的目的地'.$destination);
 			}
 			$dregion = $m->ar('_id',$destination)->r;
 			if($m->ar('_id',intval($data['area']))->r !== $dregion && !$across_regions && $m->rg('_id',$this->region)->type != 'start'){
@@ -61,7 +61,7 @@ class player_dtsp extends player_bra
 			$this->feedback('移动到了 '.$mapname);
 			if(isset($this->data['action']['battle'])){
 				unset($this->data['action']['battle']);
-				$this->error('移动前遇敌已放弃');
+				$this->feedback('移动前遇敌已放弃');
 			}
 			$this->ajax('location', array('name' => $mapname,'background' => 'img/'.$img_dir.'/'.$m->rg('_id',$this->region)->background, 'shop' => in_array(intval($data['area']), $shopmap, true)));
 			if(!$ignore_search){

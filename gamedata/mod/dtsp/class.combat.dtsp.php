@@ -19,7 +19,7 @@ class combat_dtsp extends combat_bra
 
 	public function battle_start()
 	{
-		global $g;
+		global $g,$base_range;
 
 		$attacker = $this->attacker;
 		$defender = $this->defender;
@@ -37,10 +37,10 @@ class combat_dtsp extends combat_bra
 			//默认不允许反击反击
 			$counter = !$has_countered;
 
-			foreach($defender->buff as $key => &$buff){
-				switch($buff['type']){
+			foreach ($defender->buff as $key => &$buff) {
+				switch ($buff['type']) {
 					case 'komeiji_suit':
-						if($buff['param']['quantity'] >= 5){
+						if ($buff['param']['quantity'] >= 5) {
 							//古明地套装五件效果
 							$counter = true;
 						}
@@ -48,7 +48,16 @@ class combat_dtsp extends combat_bra
 				}
 			}
 
-			$counter = $counter && $g->determine(intval($this->get_counter_rate($attacker, $defender)));
+			$rangeflag = $counterflag = false;
+			$attrange = $base_range[$this->weapon_kind($attacker)];
+			$defrange = $base_range[$this->weapon_kind($defender)];
+			if ($attrange && $defrange && $attrange >= $defrange) {
+				$rangeflag = true;
+			}
+			if ($g->determine(intval($this->get_counter_rate($attacker, $defender)))) {
+				$counterflag = true;
+			}
+			$counter = $counter && $rangeflag && $counterflag;
 
 			if ($counter) {
 				$this->feedback($defender->name . '发起反击');
@@ -56,8 +65,12 @@ class combat_dtsp extends combat_bra
 				$temp = $attacker;
 				$attacker = $defender;
 				$defender = $temp;
-			} else {
-				$this->feedback($defender->name . '无法反击，逃跑了');
+			} elseif(!$has_countered){
+				if (!$rangeflag) {
+					$this->feedback($defender->name . '射程不足，无法反击，逃跑了');
+				} elseif (!$counterflag) {
+					$this->feedback($defender->name . '未准备好，无法反击，逃跑了');
+				}
 				$this->gain_experience($defender, $attacker);
 			}
 		}while($counter);
