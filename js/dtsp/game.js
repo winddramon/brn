@@ -240,14 +240,45 @@ function respond(data){
 				break;
 			case 'location':
 				$("#F-console-area").html(param['name']);
-				$("#F-consol-map-background").attr("src",param['background']);
 				if(param['shop']){
 					$("#F-console-panel-shop").slideDown(200);
 				}else{
 					$("#F-console-panel-shop").slideUp(200);
 				}
 				break;
-			
+            case 'map':
+                var map_background = param['regioninfo']['background'];
+                var map_size = param['regioninfo']['displaysize'];
+
+                for(var my = 0; my < 10; my ++){
+                    for(var mx = 0; mx < 10; mx ++){
+                        var map_coor = mx+'-'+my;
+                        if($('div[coor='+ map_coor +']').length > 0){
+                            $('div[coor='+ map_coor +']').attr('mid','');
+                            $('div[coor='+ map_coor +'] div')[0].innerHTML = '';
+                            if(mx > map_size[0] || my > map_size[1]){
+                                $('div[coor='+ map_coor +']').display = 'hidden';
+                            }else{
+                                $('div[coor='+ map_coor +']').display = 'block';
+
+                            }
+                        }
+                    }
+                }
+
+                for(var ma in param['areas']){
+
+                    var area = param['areas'][ma];
+
+                    if($('div[coor='+ area['c'] +']').length > 0){
+
+                        $('div[coor='+ area['c'] +']').attr('mid',area['_id']);
+                        $('div[coor='+ area['c'] +'] div')[0].innerHTML = area['n'];
+                    }
+                }
+
+                $("#F-consol-map-background").attr("src",map_background);
+                break;
 			case 'rage':
 				$("#F-console-rage").html(param['rage']);
 				break;

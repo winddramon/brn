@@ -7,19 +7,9 @@
 		for($y = 0; $y <= $map_size[1]; $y ++){
 			?><div class="map_row"><?php
 			for($x = 0; $x <= $map_size[0]; $x ++){
-				?><div class="map_block" mid=<?php
-				$coor = strval($x).'-'.strval($y);
-				if($GLOBALS['m']->ar('c',$coor)){
-					$_id = $GLOBALS['m']->ar('c',$coor)->_id;
-					$name = $GLOBALS['m']->ar('c',$coor)->n;
-					echo $_id;
-					?>><div><?php
-					echo $name;
-					?></div><?php
-				}else{
-					echo '-1><div> </div>';
-				}
-				?></div><?php
+				?><div class="map_block" coor=<?php
+				echo strval($x).'-'.strval($y);
+				?>><div></div></div><?php
 			}
 			?></div><?php
 		}

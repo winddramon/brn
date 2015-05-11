@@ -9,12 +9,12 @@ $regioninfo = array(
 		'destination' => 1,		//下一个区域
 		'access' => false,			//区域入口: 0或者正数为地图编号，负数为该等级随机
 		'duration' => 0,
-		'displaysize' => array(3,3),
+		'displaysize' => array(2,2),
 		'background' => 'region1.png',
 		'group' => array(
 			'static' => array(
 				'num' => -1,
-				'list' => array(0)
+				'arealist' => array(0)
 			)
 		)
 	),
@@ -24,16 +24,17 @@ $regioninfo = array(
 		'destination' => 2,
 		'access' => 1,
 		'duration' => 300,
-		'displaysize' => array(1,1),
+		'displaysize' => array(4,4),
 		'background' => 'region2.png',
 		'group' => array(
 			'static' => array(
 				'num' => -1,
-				'list' => array(1)
+				'arealist' => array(1)
 			),
 			'random' => array(
 				'num' => 1,
-				'list' => array(11,12)
+				'arealist' => array(11,12),
+				'randomcoors' => array('1-1','1-2','2-1')
 			)
 		)
 	),
@@ -43,16 +44,17 @@ $regioninfo = array(
 		'destination' => 3,
 		'access' => -1,
 		'duration' => 300,
-		'displaysize' => array(1,1),
+		'displaysize' => array(4,4),
 		'background' => 'region2.png',
 		'group' => array(
 			'static' => array(
 				'num' => -1,
-				'list' => array(2)
+				'arealist' => array(2)
 			),
 			'random' => array(
 				'num' => 1,
-				'list' => array(13,14)
+				'arealist' => array(13,14),
+				'randomcoors' => array('3-3','3-4','4-4')
 			)
 		)
 	),
@@ -62,12 +64,12 @@ $regioninfo = array(
 		'destination' => false,
 		'access' => 3,
 		'duration' => 300,
-		'displaysize' => array(1,1),
+		'displaysize' => array(2,2),
 		'background' => 'region2.png',
 		'group' => array(
 			'static' => array(
 				'num' => -1,
-				'list' => array(3)
+				'arealist' => array(3)
 			)
 		)
 	)

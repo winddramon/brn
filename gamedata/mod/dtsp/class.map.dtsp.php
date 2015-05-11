@@ -21,7 +21,7 @@ class map_container_dtsp
 		foreach ($regioninfo as $rval) {
 			$this->regions[$rval['_id']] = new region_dtsp($rval);
 			foreach ($rval['group'] as $rgval) {
-				foreach ($rgval['list'] as $lval) {
+				foreach ($rgval['arealist'] as $lval) {
 					if (isset($this->areas_static[$lval])) {
 						$this->areas_static[$lval]->r = $rval['_id'];
 					}
@@ -51,7 +51,7 @@ class map_container_dtsp
 		foreach ($this->regions as $robj) {
 			foreach ($robj->group as $rgval) {
 				if ($rgval['num'] < 0) {//先把全部固定地图标注完毕
-					foreach ($rgval['list'] as $lval) {
+					foreach ($rgval['arealist'] as $lval) {
 						$map_coordinates[] = $this->areas_static[$lval]->c;
 						$maplist[] = $this->areas_static[$lval]->data;
 					}
@@ -61,14 +61,16 @@ class map_container_dtsp
 		foreach ($this->regions as $robj) {//之后分配随机地图。这个参数是0的地图完全不放置
 			foreach ($robj->group as $rgval) {
 				if ($rgval['num'] > 0) {
-					$list = $rgval['list'];
+					$list = $rgval['arealist'];
 					shuffle($list);
 					$mlist = array_slice($list, 0, $rgval['num']);
 					foreach ($mlist as $lval) {
 						$sub = $this->areas_static[$lval];
 						$i = 0;
 						do {
-							$mcoor = $g->random(0, $map_size[0]) . '-' . $g->random(0, $map_size[1]);
+							shuffle($rgval['randomcoors']);
+							$mcoor = $rgval['randomcoors'][0];
+							//$mcoor = $g->random(0, $map_size[0]) . '-' . $g->random(0, $map_size[1]);
 							if ($i >= 1000) {
 								throw_error('Initiating maps failed.');
 							}
@@ -117,6 +119,18 @@ class map_container_dtsp
 					return $aobj;
 				}
 			}
+		} elseif ($c === 'r' && is_numeric($p)) {
+			$alist = array();
+
+			foreach ($this->areas as $aobj) {
+
+				if ($aobj->r == $p) {
+
+					$alist[] = $aobj;
+				}
+			}
+			//file_put_contents('a.txt', serialize($alist));
+			return $alist;
 		}
 	}
 
@@ -143,6 +157,17 @@ class map_container_dtsp
 				return $regions;
 			}
 		}
+	}
+	public function get_region_maps($region){//打包传给前端
+		global $img_dir;
+		$return = array();
+		$areas = $this->ar('r',$region);
+		foreach ($areas as $aobj){
+			$return['areas'][] = array('_id' => $aobj->_id, 'n'=> $aobj->n, 'c'=>$aobj->c);
+		}
+		$robj = $this->rg('_id',$region);
+		$return['regioninfo'] = array('displaysize' => $robj->displaysize, 'background' => 'img/'.$img_dir.'/'.$robj->background);
+		return $return;
 	}
 
 	public function get_region_access($region)
