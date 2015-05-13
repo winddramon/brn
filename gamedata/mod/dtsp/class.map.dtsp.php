@@ -248,6 +248,7 @@ class region_dtsp
 	public function __construct($data)
 	{
 		$this->data['_id'] = $data['_id'];
+		$this->data['name'] = $data['name'];
 		$this->data['destination'] = $data['destination'];
 		$this->data['type'] = $data['type'];
 		$this->data['access'] = $data['access'];

@@ -254,12 +254,12 @@ function respond(data){
                     for(var mx = 0; mx < 10; mx ++){
                         var map_coor = mx+'-'+my;
                         if($('div[coor='+ map_coor +']').length > 0){
-                            $('div[coor='+ map_coor +']').attr('mid','');
+                            $('div[coor='+ map_coor +']').attr('mid','-1');
                             $('div[coor='+ map_coor +'] div')[0].innerHTML = '';
                             if(mx > map_size[0] || my > map_size[1]){
-                                $('div[coor='+ map_coor +']').display = 'hidden';
+                                $('div[coor='+ map_coor +']')[0].display = 'hidden';
                             }else{
-                                $('div[coor='+ map_coor +']').display = 'block';
+                                $('div[coor='+ map_coor +']')[0].display = 'block';
 
                             }
                         }

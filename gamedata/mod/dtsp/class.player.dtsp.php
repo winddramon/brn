@@ -1124,4 +1124,14 @@ class player_dtsp extends player_bra
 			unset($item['sk']);
 		}
 	}
+
+	public function chat_send($msg)
+	{
+		global $a, $m;
+		//添加地区信息
+		$content = '<span class="area">【'.$m->ar('_id',$this->area)->n.'】</span>';
+		$content .= '<span class="username">'.$this->name.':</span>';
+		$content .= '<span class="chatmsg">'.$msg.'</span>';
+		$a->action('chat_msg', array('msg' => $content, 'time' => time()), true);
+	}
 }
