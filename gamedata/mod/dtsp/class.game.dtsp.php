@@ -98,7 +98,7 @@ class game_dtsp extends game_bra
 			if($player->teamID == -1){
 				$team_names[$player->_id] = '无队伍';
 			}else{
-				$team = $db->select('team', array('name'), array('_id' => $player['teamID']));
+				$team = $db->select('team', array('name'), array('_id' => $player->teamID));
 				if($team){
 					$team_names[$player->_id] = $team[0]['name'];
 				}else{
