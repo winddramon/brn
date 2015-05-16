@@ -31,6 +31,6 @@ include(ROOT_DIR.'/gamedata/settings.dtsp.php');
 include(get_mod_path('dtsp').'/include/settings.lang.dtsp.php');
 include(get_mod_path('dtsp').'/include/settings.maps.dtsp.php');
 
-//include(get_mod_path('dtsp').'/include/func.general.dtsp.php');
+include(get_mod_path('dtsp').'/include/func.global.dtsp.php');
 
 ?>

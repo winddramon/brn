@@ -29,7 +29,7 @@
   baseatt smallint unsigned NOT NULL default '0',
   basedef smallint unsigned NOT NULL default '0',
   region tinyint unsigned NOT NULL default '0',
-  area tinyint unsigned NOT NULL default '0',
+  area smallint unsigned NOT NULL default '0',
   lvl tinyint unsigned NOT NULL default '0',
   `exp` smallint unsigned NOT NULL default '0',
   `upexp` smallint unsigned NOT NULL default '0',

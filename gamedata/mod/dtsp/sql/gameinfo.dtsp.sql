@@ -1,6 +1,7 @@
 (
   `gamenum` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `gamestate` tinyint(1) unsigned NOT NULL DEFAULT '0',
+  `gametype` tinyint(1) unsigned NOT NULL DEFAULT '0',
   `starttime` int(10) unsigned NOT NULL DEFAULT '0',
   `winmode` varchar(20) NOT NULL DEFAULT 'error',
   `winner` varchar(1000) NOT NULL DEFAULT '[]',
@@ -16,7 +17,7 @@
   `hdamage` int(11) unsigned NOT NULL DEFAULT '0',
   `hplayer` varchar(15) NOT NULL DEFAULT '',
   `settings` varchar(15) NOT NULL DEFAULT 'default',
-  `maplist` varchar(5120) NOT NULL DEFAULT '[]',
+  `maplist` varchar(2000) NOT NULL DEFAULT '[]',
   
   PRIMARY KEY (`gamenum`)
 )

@@ -417,7 +417,7 @@ class chlorodb_pdo implements IChloroDB
 			$where['_id'] = intval($where['_id']);
 		}
 		*/
-		
+
 		$where = $this->convert_id($where);
 		
 		$result = '';
@@ -430,7 +430,7 @@ class chlorodb_pdo implements IChloroDB
 					
 					$result .= '(';
 					foreach($value as $subvalue){
-						$result .= '('.$this->parse_where($subvalue).') OR ';
+						$result .= '('.$this->parse_where($params, $subvalue).') OR ';
 					}
 					$result = substr($result, 0, strlen($result) - 4).')';
 					break;
@@ -442,7 +442,7 @@ class chlorodb_pdo implements IChloroDB
 					
 					$result .= '(';
 					foreach($value as $subvalue){
-						$result .= '('.$this->parse_where($subvalue).') AND ';
+						$result .= '('.$this->parse_where($params, $subvalue).') AND ';
 					}
 					$result = substr($result, 0, strlen($result) - 5).')';
 					break;

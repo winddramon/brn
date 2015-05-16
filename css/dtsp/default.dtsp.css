@@ -1804,7 +1804,7 @@ body{
 	margin: 10px 0;
 }
 
-#register input[type="submit"]{
+#register input[type="button"]{
 	height: 30px;
 	width: 60px;
 	margin: 30px auto;

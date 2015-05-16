@@ -458,7 +458,11 @@ function respond(data){
 			case 'need_login':
 				alert("请先登录");
 				break;
-			
+
+            case 'need_logout':
+                alert("请先登出账号");
+                break;
+
 			case 'game_over':
 				alert("游戏尚未开始");
 				break;

@@ -73,11 +73,13 @@ class player_dtsp extends player_bra
 			$this->ajax('heal_speed', array('hpps' => $hr['hp'], 'spps' => $hr['sp']));
 			
 			//进入最终战场的时候 增加倒计时
-			if($dregion == $final_region){
-				$this->set_last_stand();
-//				$g->check_all_laststand($this);	
+			if($g->gameinfo['gametype'] == GAME_TYPE_RUSH){
+				if($dregion == $final_region){
+					$this->set_last_stand();
+//				$g->check_all_laststand($this);
+				}
+				$this->set_region_jump();
 			}
-			$this->set_region_jump();
 		}
 	}
 	
@@ -89,7 +91,7 @@ class player_dtsp extends player_bra
 		parent::search();
 		if($this->region == $final_region){
 			$this->set_last_stand();
-//			$g->check_all_laststand($this);	
+//			$g->check_all_laststand($this);
 		}
 		$this->set_region_jump();
 	}
@@ -462,6 +464,7 @@ class player_dtsp extends player_bra
 	
 	public function remove_buff($key)
 	{
+		global $g;
 		$buff = $this->data['buff'][$key];
 		
 		parent::remove_buff($key);

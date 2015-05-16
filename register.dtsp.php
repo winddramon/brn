@@ -16,14 +16,16 @@ if(isset($_POST['username'])){
 		if($username == '' || $password == ''){
 			$info = '用户名与密码不能为空';
 		}else{
-			$users = $db->select('users', '_id', array('username' => $username));
-			if($users === false){
+			$ip = real_ip();
+			$users_n = $db->select('users', array('_id','username'), array('username' => $username));
+			$users_i = $db->select('users', array('_id','ip'), array('ip' => $ip));
+			if($users_n === false && count($users_i) < 3){
 				$db->insert('users', array(
 					'username' => $username,
 					'password' => encode_password($username,$password),
 					'groupid' => 0,
 					'lastgame' => 0,
-					'ip' => real_ip(),
+					'ip' => $ip,
 					'credits' => 0,
 					'validgames' => 0,
 					'wingames' => 0,
@@ -38,11 +40,19 @@ if(isset($_POST['username'])){
 					));
 				$info = $username.' 注册成功';
 			}else{
-				$info = $username.' 已经存在';
+				if($users_n){
+					$info = $username.' 已经存在';
+				}else{
+					$info = '同一IP账号数目超限';
+				}
 			}
 		}
 	}
-	render_page('Register');
+}
+if(isset($info)){
+	//render_page('Register');
+	$data = array('#register-info' => array('innerHTML'=>$info));
+	general_respond($data);
 }else{
 	render_page('Register');
 }

@@ -1,4 +1,6 @@
 <?php
+define('GAME_TYPE_CLASSIC', 0);
+define('GAME_TYPE_RUSH', 1);
 
 class game_dtsp extends game_bra
 {	
@@ -46,7 +48,7 @@ class game_dtsp extends game_bra
 			}
 		}
 		
-		while($gameinfo['areatime'] <= time() && ($gameinfo['gamestate'] & GAME_STATE_START)){
+		while($gameinfo['gametype'] == GAME_TYPE_CLASSIC && $gameinfo['areatime'] <= time() && ($gameinfo['gamestate'] & GAME_STATE_START)){
 			$areanum = $this->game_forbid_area();
 			if($areanum >= sizeof($m->ar())){
 				if($this->gameinfo['validnum'] == 0){
@@ -547,6 +549,7 @@ class game_dtsp extends game_bra
 		$gameinfo['arealist'] = $arealist;
 		$gameinfo['areatime'] = $gameinfo['starttime'];
 		$gameinfo['gamestate'] |= GAME_STATE_START;
+		$gameinfo['gametype'] = GAME_TYPE_RUSH;
 		$gameinfo['hdamage'] = 0;
 		$gameinfo['hplayer'] = '';
 		
@@ -621,7 +624,7 @@ class game_dtsp extends game_bra
 						);
 					$this->convert_item($itemdata);
 					$data[] = $itemdata;
-				}				
+				}
 			}
 		}
 		
