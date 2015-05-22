@@ -30,6 +30,9 @@ $avatar_dir = 'dtsp';
 //图像文件夹
 $img_dir = 'dtsp';
 
+//同IP可以注册的账号数，防止恶意注册
+$ip_user_limit = 5;
+
 $last_stand = array(
 	'win' => 300//独存胜利的时间
 );

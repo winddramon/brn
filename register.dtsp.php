@@ -1,7 +1,7 @@
 <?php
 
 define('ROOT_DIR', dirname(__FILE__));
-define('CONNECTION_MODE', 'normal');
+define('CONNECTION_MODE', isset($_POST['username']) ? 'ajax' : 'normal');
 
 include(ROOT_DIR.'/include/func.template.php');
 include(ROOT_DIR.'/include/inc.init.php');
@@ -19,7 +19,7 @@ if(isset($_POST['username'])){
 			$ip = real_ip();
 			$users_n = $db->select('users', array('_id','username'), array('username' => $username));
 			$users_i = $db->select('users', array('_id','ip'), array('ip' => $ip));
-			if($users_n === false && count($users_i) < 3){
+			if($users_n === false && count($users_i) < $ip_user_limit){
 				$db->insert('users', array(
 					'username' => $username,
 					'password' => encode_password($username,$password),
