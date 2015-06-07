@@ -1,5 +1,5 @@
 <?php
-
+define('GAME_PAGE', 'news');
 define('ROOT_DIR', dirname(__FILE__));
 define('CONNECTION_MODE', 'normal');
 

@@ -3,6 +3,7 @@
 	<head>
 		<title><?php echo $GLOBALS['page_title']; ?></title>
 		<link rel="stylesheet" type="text/css" href="css/dtsp/default.dtsp.css">
+        <?php if (GAME_PAGE=='userdata'){ ?><link rel="stylesheet" type="text/css" href="css/dtsp/userdata.dtsp.css" /><?php } ?>
 		<script type="text/javascript" src="js/jquery-1.9.1.min.js"></script>
 		<script type="text/javascript" src="js/jquery.mousewheel.min.js"></script>
 		<script type="text/javascript" src="js/default/general.js"></script>
@@ -20,6 +21,7 @@
 				<li><a href="history.php">历史</a></li>
 				<li><a href="rank.php">排行</a></li>
 				<li><a href="help.php">帮助</a></li>
+                <li><a href="userdata.dtsp.php">用户账户</a></li>
 				<li id="nav-page-admin"><a href="admin.php">管理</a></li>
 			</ul>
 			

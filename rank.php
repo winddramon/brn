@@ -1,5 +1,6 @@
 <?php
-//TODO: ·ÖÒ³
+//TODO: ï¿½ï¿½Ò³
+define('GAME_PAGE', 'rank');
 define('ROOT_DIR', dirname(__FILE__));
 define('CONNECTION_MODE', 'normal');
 

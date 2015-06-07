@@ -1,0 +1,126 @@
+<div class="userdata-board">
+    <div id="uinfo">
+        需要修改密码则输入原密码和新密码，留空为不修改。<br />
+        注意：若玩家已进入游戏，对性别和头像的修改将在下一局生效。<br />
+        <span id="userdata-info"></span>
+    </div>
+    <hr />
+    <div id="ucmd">
+        <form id="userdata-form" method="post">
+            <input type="hidden" id="username" name="username" value="<?php echo $GLOBALS['cuser']['username'] ?>">
+            <input type="hidden" id="chgpass" name="chgpass" value="0">
+            <input type="hidden" id="avatar_dir" value="<?php echo $GLOBALS['avatar_dir'] ?>">
+            <input type="hidden" id="iconuri" name="iconuri" value="<?php echo $GLOBALS['user']['iconuri']; ?>">
+            <li class="userdata-li">
+                <span>用户名</span>
+                <div id="userdata-username"><?php echo $GLOBALS['cuser']['username'] ?></div>
+            </li>
+            <li class="userdata-li">
+                <span>原密码</span>
+                <div><input type="button" id="userdata-chgpass-button" value="修改密码" /></div>
+                <div><input type="text" id="userdata-chgpass-old" name="oldpass" value="" style="display:none"/></div>
+            </li>
+            <div id="userdata-chgpass-hidden" style="display:none">
+                <li class="userdata-li">
+                    <span>新密码</span>
+                    <div><input type="text" id="userdata-chgpass-new" name="newpass" value="" /></div>
+                </li>
+                <li class="userdata-li">
+                    <span>重复新密码</span>
+                    <div><input type="text" id="userdata-chgpass-new2" name="newpass2" value="" /></div>
+                </li>
+                <li class="userdata-li">
+                    <span></span>
+                    <div><input type="button" id="userdata-chgpass-submit" value="修改密码" /></div>
+                </li>
+            </div>
+            <hr />
+            <li class="userdata-li">
+                <span>性别</span>
+                <div>
+                    <input type="radio" name="gender" value="m" <?php if($GLOBALS['user']['gender'] == 'm') echo 'checked'; ?> />男生
+                    &nbsp;&nbsp;&nbsp;
+                    <input type="radio" name="gender" value="f" <?php if($GLOBALS['user']['gender'] == 'f') echo 'checked'; ?> />女生
+                </div>
+            </li>
+            <li class="userdata-li">
+                <span>头像</span>
+                <div>
+                    <img id="avatar" src="<?php echo $GLOBALS['user']['iconuri']; ?>">
+                    <?php global $icon_num; ?>
+                    <div class="icon-selector" id="cont-icon-f" <?php if($GLOBALS['user']['gender'] == 'm') echo 'style="display:none"'; ?> >
+                        <select id="icon-f" name="icon-f">
+                            <?php for($i = 0; $i <= $icon_num['f']; $i ++){?>
+                            <option value="<?php echo $i; ?>"><?php echo $i; ?></option>
+                            <?php } ?>
+                        </select>
+                    </div>
+                    <div class="icon-selector" id="cont-icon-m" <?php if($GLOBALS['user']['gender'] == 'f') echo 'style="display:none"'; ?> >
+                        <select id="icon-m" name="icon-m">
+                            <?php for($i = 0; $i <= $icon_num['m']; $i ++){?>
+                            <option value="<?php echo $i; ?>"><?php echo $i; ?></option>
+                            <?php } ?>
+                        </select>
+                    </div>
+                </div>
+            </li>
+
+            <li class="userdata-li">
+                <span>铭言</span>
+                <div><input type="text" name="motto" value="<?php echo $GLOBALS['user']['motto'] ?>" /></div>
+            </li>
+            <li class="userdata-li">
+                <span>击杀留言</span>
+                <div><input type="text" name="killmsg" value="<?php echo $GLOBALS['user']['killmsg'] ?>" /></div>
+            </li>
+            <li class="userdata-li">
+                <span>遗言</span>
+                <div><input type="text" name="lastword" value="<?php echo $GLOBALS['user']['lastword'] ?>" /></div>
+            </li>
+            <hr />
+            <li class="userdata-li">
+                <span></span>
+                <div><input type="button" id="userdata-submit" value="提交">不修改密码</div>
+            </li>
+        </form>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $("#ucmd #userdata-submit").click(function(e){
+
+        general_ajax('userdata.dtsp.php', '#userdata-form');
+    });
+    $("#ucmd #userdata-chgpass-submit").click(function(e){
+        $("#chgpass")[0].value=1;
+        general_ajax('userdata.dtsp.php', '#userdata-form');
+    });
+    $("#ucmd #userdata-chgpass-button").click(function(e){
+        $('#userdata-chgpass-button')[0].style.display='none';
+        $('#userdata-chgpass-old')[0].style.display='inline';
+        $('#userdata-chgpass-hidden')[0].style.display='block';
+    });
+    $("#ucmd .icon-selector select").change(function(){
+        var gender = $("#ucmd input[name='gender']:checked").val();
+        var icon = $("#ucmd .icon-selector select#icon-"+gender).children('option:selected').val();
+        var avatar_dir = $("#avatar_dir").val();
+        change_avatar("#avatar","#iconuri",gender, icon, avatar_dir);
+    });
+    $("#ucmd input[type='radio']").change(function(){
+        var gender = $("#ucmd input[name='gender']:checked").val();
+        var icon = $("#ucmd .icon-selector select#icon-"+gender).children('option:selected').val();
+        var avatar_dir = $("#avatar_dir").val();
+        change_avatar("#avatar","#iconuri",gender, icon, avatar_dir);
+        switch(gender){
+            case "f":
+                $("#cont-icon-f").show();
+                $("#cont-icon-m").hide();
+                break;
+            case "m":
+            default:
+                $("#cont-icon-f").hide();
+                $("#cont-icon-m").show();
+                break;
+        }
+    });
+</script>

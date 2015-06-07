@@ -1,0 +1,20 @@
+/*-----------------Userdata-----------------*/
+div.userdata-board{
+    position: absolute;
+    top:28px;
+}
+#ucmd li.userdata-li{
+    list-style: none;
+    line-height: 30px;
+}
+
+#ucmd li.userdata-li span{
+    width: 100px;
+    margin-right: 10px;
+    font: 16px bold 微软雅黑;
+}
+
+#ucmd li.userdata-li div{
+    display: inline;
+    font: 16px bold 微软雅黑;
+}

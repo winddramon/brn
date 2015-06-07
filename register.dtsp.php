@@ -1,5 +1,5 @@
 <?php
-
+define('GAME_PAGE', 'register');
 define('ROOT_DIR', dirname(__FILE__));
 define('CONNECTION_MODE', isset($_POST['username']) ? 'ajax' : 'normal');
 
