@@ -8,12 +8,12 @@ class command_dtsp extends command_bra
 		$cplayer = $this->player;
 		
 		//如果用户没有激活弹出激活界面
-		if($cplayer === false && $action !== 'enter_game' && !($g->gameinfo['gamestate'] & GAME_STATE_COMBO)){
+		if($cplayer === false && $action !== 'enter_game' && $g->gameinfo['gamestate'] < GAME_STATE_LOCKED){
 			$a->action('need_join', $this->get_need_join_data());
 			$a->flush();
 			return;
 		}elseif($cplayer === false && $action !== 'enter_game'){
-			$a->action('combo');
+			$a->action('locked');
 			return;
 		}
 		

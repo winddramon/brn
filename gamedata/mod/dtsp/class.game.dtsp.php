@@ -1,4 +1,8 @@
 <?php
+define('GAME_STATE_CLOSED', 0);
+define('GAME_STATE_WAITING', 10);
+define('GAME_STATE_OPEN', 20);
+define('GAME_STATE_LOCKED', 30);
 define('GAME_TYPE_CLASSIC', 0);
 define('GAME_TYPE_RUSH', 1);
 
@@ -39,16 +43,21 @@ class game_dtsp extends game_bra
 		
 		$gameinfo = &$this->gameinfo;
 		$m = new map_container_dtsp();
-		
-		if(($gameinfo['gamestate'] & GAME_STATE_START) === 0){
-			if($gameinfo['starttime'] < time()){
-				$this->game_start();
-			}else{
-				return;
-			}
+
+		//游戏开始时间前1分钟，进行游戏准备
+		if($gameinfo['gamestate'] === GAME_STATE_CLOSED && time() > $gameinfo['starttime'] - 60){
+			$this->game_prepare();
+		}
+
+		if($gameinfo['gamestate'] === GAME_STATE_WAITING && time() > $gameinfo['starttime']){
+			$this->game_start();
+		}
+		//暂定10分钟停止激活
+		if($gameinfo['gamestate'] === GAME_STATE_OPEN && time() > $gameinfo['starttime'] + 600){
+			$this->game_lock();
 		}
 		
-		while($gameinfo['gametype'] == GAME_TYPE_CLASSIC && $gameinfo['areatime'] <= time() && ($gameinfo['gamestate'] & GAME_STATE_START)){
+		while($gameinfo['gametype'] == GAME_TYPE_CLASSIC && $gameinfo['areatime'] <= time() && ($gameinfo['gamestate'] === GAME_STATE_CLOSED)){
 			$areanum = $this->game_forbid_area();
 			if($areanum >= sizeof($m->ar())){
 				if($this->gameinfo['validnum'] == 0){
@@ -127,7 +136,7 @@ class game_dtsp extends game_bra
 
 		$this->insert_news('end_info', array('type' => $type, 'winner' => $winners));
 
-		$gameinfo['gamestate'] = 0;
+		$gameinfo['gamestate'] = GAME_STATE_CLOSED;
 		$gameinfo['winner'] = $winner_name;
 		$gameinfo['winmode'] = $type;
 		
@@ -233,7 +242,7 @@ class game_dtsp extends game_bra
 	
 	protected function generate_welcome_message()
 	{
-		$message = '
+		$message = <<<EOT
 <p class="welcome">
 <img border="0" src="img/i_hayashida.gif" width="70" height="70"><br /><br />
 <span id="br" style="width:100%;filter:blur(add=1,direction=135,strength=9):glow(strength=5,color=gold); font-weight:700; text-decoration:underline">
@@ -243,7 +252,7 @@ class game_dtsp extends game_bra
 <br>
 <font color="#666666">（点击任意处继续）</font>
 </p>
-		';
+EOT;
 		return $message;
 	}
 	
@@ -270,6 +279,7 @@ class game_dtsp extends game_bra
 			'icon' => 'img/dtsp/n_'.$player['icon'].'.png'
 			));
 	}
+
 	
 	protected function np_generate_icon(&$user, $gender)
 	{
@@ -296,7 +306,12 @@ class game_dtsp extends game_bra
 			return 'img/dtsp/'.$gender.'_'.$icon.'.png';
 		}
 	}
-	
+
+	protected function game_resource_refresh(){
+		global $a, $db, $gameinfo, $map, $mapsize, $round_area, $weatherinfo, $normal_weather, $combo_round;
+
+	}
+
 	protected function np_generate_club(&$user)
 	{
 		return (isset($GLOBALS['param']['club']) && $GLOBALS['param']['club'] > 0 && $GLOBALS['param']['club'] < sizeof($GLOBALS['clubinfo'])) ? $GLOBALS['param']['club'] : $GLOBALS['g']->random(1, sizeof($GLOBALS['clubinfo']) - 1);
@@ -450,7 +465,15 @@ class game_dtsp extends game_bra
 			case 'horai':
 				$content = '<span class="username">'.$args['name'].'</span>体内的蓬莱之药发出了光芒，<span class="username">'.$args['name'].'</span>复活了';
 				break;
-			
+
+			case 'prepare':
+				$content = '<span class="system">第<span class="gamenum">'.$this->gameinfo['gamenum'].'</span>局游戏已经准备完毕</span>';
+				break;
+
+			case 'lock':
+				$content = '<span class="system">第<span class="gamenum">'.$this->gameinfo['gamenum'].'</span>局游戏停止激活了</span>';
+				break;
+
 			default:
 				$content =  parent::insert_news($type, $args);
 				if($type != 'damage'){
@@ -492,18 +515,32 @@ class game_dtsp extends game_bra
 		
 		return $npc;
 	}
-	
+
+	public function game_start(){
+		global $gameinfo;
+		$gameinfo['gamestate'] = GAME_STATE_OPEN;
+		$this->insert_news('start', $gameinfo['gamenum']);
+		return;
+	}
+
+	public function game_lock(){
+		global $gameinfo;
+		$gameinfo['gamestate'] = GAME_STATE_LOCKED;
+		$this->insert_news('lock', $gameinfo['gamenum']);
+		return;
+	}
+
 	/**
-	 * 游戏开始时会调用的函数
+	 * 游戏准备时会调用的函数
 	 * 为可变地图的储存而重载了此函数。地图数据储存在gameinfo中。
 	 *
 	 * return null
 	 */	 
-	public function game_start()
+	public function game_prepare()
 	{
 		global $db, $c, $m, $gameinfo, $map, $round_area;
 		$round = -1;
-		$gameinfo['gamestate'] = 0;
+		$gameinfo['gamestate'] = GAME_STATE_CLOSED;
 		
 		/*===================Maps Initialization==================*/
 		$m->reset_active();
@@ -548,13 +585,13 @@ class game_dtsp extends game_bra
 		$gameinfo['deathnum'] = 0;
 		$gameinfo['arealist'] = $arealist;
 		$gameinfo['areatime'] = $gameinfo['starttime'];
-		$gameinfo['gamestate'] |= GAME_STATE_START;
+		$gameinfo['gamestate'] = GAME_STATE_WAITING;
 		$gameinfo['gametype'] = GAME_TYPE_RUSH;
 		$gameinfo['hdamage'] = 0;
 		$gameinfo['hplayer'] = '';
 		
 		/*======================Insert News=======================*/
-		$this->insert_news('start', $gameinfo['gamenum']);
+		$this->insert_news('prepare', $gameinfo['gamenum']);
 		
 		return;
 	}

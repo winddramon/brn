@@ -1,29 +1,31 @@
-//function request(action, param){
-//	if(ajax_lock){
-//		return;
-//	}
-//	ajax_lock = true;
-//	ajax_plock = true;
-//	
-//	if(param == undefined){
-//		param = {};
-//	}
-//	
-//	request_msec = (new Date()).valueOf();
-//	
-//	$.post("command.dtsp.php", { action : action , param : param }, function(data, status){//入口修改为command.dtsp.php
-//		ajax_lock = false;
-//		ajax_plock = false;
-//		if(!status){
-//			error_msg("网络传输错误");
-//		}else{
-//			respond(data);
-//		}
-//	}, "json")
-//	.error(function(e){
-//		debug("Unparsable Content: " + e.responseText);
-//	});
-//}
+function request(action, param){
+	if(ajax_lock){
+		return;
+	}
+	ajax_lock = true;
+	ajax_plock = true;
+
+	if(param == undefined){
+		param = {};
+	}
+
+	request_msec = (new Date()).valueOf();
+
+	$.post("command.dtsp.php", { action : action , param : param }, function(data, status){//入口修改为command.dtsp.php
+		ajax_lock = false;
+		ajax_plock = false;
+		if(!status){
+			error_msg("网络传输错误");
+		}else{
+			respond(data);
+		}
+	}, "json")
+	.error(function(e){
+		debug("Unparsable Content: " + e.responseText);
+	});
+}
+
+
 
 function enter_change_avatar(gender, icon, avatar_dir){
 	var avatar_dir = typeof(avatar_dir) == "undefined" ? "" : avatar_dir + '/';
@@ -470,7 +472,11 @@ function respond(data){
 			case 'need_join':
 				init_join(param);
 				break;
-				
+
+            case 'locked':
+                alert("游戏已停止激活！");
+                break;
+
 			case 'combo':
 				alert("连斗以后不允许加入游戏");
 				break;
