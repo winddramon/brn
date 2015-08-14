@@ -10,7 +10,7 @@ function login(username, icon, admin){
 		$("#nav-cuser-name").fadeIn(500);
 		$("#nav-cuser-logout").fadeIn(500);
 	});
-	
+
 	if(admin){
 		$("#nav-page-admin").fadeIn(1000);
 	}
@@ -18,13 +18,13 @@ function login(username, icon, admin){
 
 function logout(){
 	user = false;
-	
+
 	$("#nav-cuser-name").fadeOut(500);
 	$("#nav-cuser-logout").fadeOut(500, function(){
 		$("#nav-cuser-register").fadeIn(500);
 		$("#nav-cuser-login").fadeIn(500);
 	});
-	
+
 	$("#nav-page-admin").fadeOut(1000);
 }
 

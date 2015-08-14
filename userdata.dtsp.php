@@ -45,6 +45,8 @@ if(isset($_POST['username'])){
 	}else{
 		if($user) {//TODO: 如果$cuser改成对象，那么这里应该同时更新$cuser
 			$user['gender'] = $_POST['gender'];
+			if($user['gender'] == 'm'){$user['icon'] = $_POST['icon-m'];}
+			elseif($user['gender'] == 'f'){$user['icon'] = $_POST['icon-f'];}
 			$user['iconuri'] = $_POST['iconuri'];
 			$user['motto'] = $_POST['motto'];
 			$user['killmsg'] = $_POST['killmsg'];

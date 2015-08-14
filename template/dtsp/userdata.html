@@ -51,14 +51,14 @@
                     <div class="icon-selector" id="cont-icon-f" <?php if($GLOBALS['user']['gender'] == 'm') echo 'style="display:none"'; ?> >
                         <select id="icon-f" name="icon-f">
                             <?php for($i = 0; $i <= $icon_num['f']; $i ++){?>
-                            <option value="<?php echo $i; ?>"><?php echo $i; ?></option>
+                            <option value="<?php echo $i; ?>" <?php if($GLOBALS['user']['icon'] == $i) echo 'selected'; ?>><?php echo $i; ?></option>
                             <?php } ?>
                         </select>
                     </div>
                     <div class="icon-selector" id="cont-icon-m" <?php if($GLOBALS['user']['gender'] == 'f') echo 'style="display:none"'; ?> >
                         <select id="icon-m" name="icon-m">
                             <?php for($i = 0; $i <= $icon_num['m']; $i ++){?>
-                            <option value="<?php echo $i; ?>"><?php echo $i; ?></option>
+                            <option value="<?php echo $i; ?> " <?php if($GLOBALS['user']['icon'] == $i) echo 'selected'; ?>><?php echo $i; ?></option>
                             <?php } ?>
                         </select>
                     </div>
