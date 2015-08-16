@@ -43,6 +43,15 @@ $round_time = 1800;
 //一局结束以后的等待时间（分钟）
 $game_interval = 3;
 
+//一局开始前的准备时间（分钟）
+$game_prepare = 1;
+
+//游戏锁定时间（分钟）
+$game_close = 60;
+
+//游戏强制结束时间（分钟）
+$game_timeup = 180;
+
 //治疗速度
 $heal_rate = array(
 	'hp' => 0.5, //每秒生命回复速度

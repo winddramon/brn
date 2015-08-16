@@ -39,34 +39,55 @@ class game_dtsp extends game_bra
 			$GLOBALS[$key] = $value;
 		}
 		
-		global $m;
+		global $m, $game_prepare, $game_close, $game_timeup;
 		
 		$gameinfo = &$this->gameinfo;
+		//创建地图对象——之所以放在这里是因为接下来的游戏判断马上就要用到map_container类的方法
 		$m = new map_container_dtsp();
 
-		//游戏开始时间前1分钟，进行游戏准备
-		if($gameinfo['gamestate'] === GAME_STATE_CLOSED && time() > $gameinfo['starttime'] - 60){
+		//游戏准备时间到时，进行游戏准备（重设各类参数、放置道具和NPC等，0禁按理也应放在这里），游戏状态变为GAME_STATE_WAITING
+		if($gameinfo['gamestate'] === GAME_STATE_CLOSED && time() > $gameinfo['starttime'] - $game_prepare * 60){
 			$this->game_prepare();
 		}
-
+		
+		//游戏开始时间到时，真正放玩家入场，游戏状态变为GAME_STATE_OPEN
 		if($gameinfo['gamestate'] === GAME_STATE_WAITING && time() > $gameinfo['starttime']){
 			$this->game_start();
 		}
-		//暂定10分钟停止激活
-		if($gameinfo['gamestate'] === GAME_STATE_OPEN && time() > $gameinfo['starttime'] + 600){
+		
+		//游戏锁定时间到时，停止激活（玩家不能再进入游戏），游戏状态变为GAME_STATE_LOCKED
+		//游戏状态改变为GAME_STATE_CLOSED是在game_end()里完成
+		if($gameinfo['gamestate'] === GAME_STATE_OPEN && time() > $gameinfo['starttime'] + $game_close * 60){
 			$this->game_lock();
 		}
 		
-		while($gameinfo['gametype'] == GAME_TYPE_CLASSIC && $gameinfo['areatime'] <= time() && ($gameinfo['gamestate'] === GAME_STATE_CLOSED)){
-			$areanum = $this->game_forbid_area();
-			if($areanum >= sizeof($m->ar())){
-				if($this->gameinfo['validnum'] == 0){
-					$this->game_end('noplayer');
-				}else{
-					$this->game_end('timeup');
-				}
-			}
+		//游戏锁定时间到时依然没有玩家，那么游戏结束
+		if($gameinfo['gamestate'] === GAME_STATE_LOCKED && $gameinfo['validnum'] <= 0){
+			$this->game_end('noplayer');
 		}
+		
+		//游戏超过强制结束的时间限制，那么游戏结束
+		if($gameinfo['gamestate'] === GAME_STATE_LOCKED && time() > $gameinfo['starttime'] + $game_timeup * 60){
+			$this->game_end('timeup');
+		}
+		
+		//游戏资源刷新机制，原禁区的一部分，由于剧情的更改而单独划出来
+		
+//		$this->update_mapitem($gameinfo['round']);
+//		$this->update_npc($gameinfo['round']);
+//		$this->update_shopitem($gameinfo['round']);
+		
+		//回头要把NPC从禁区剥离出来
+//		while($gameinfo['areatime'] <= time() && $gameinfo['gamestate'] >= GAME_STATE_WAITING){
+//			$areanum = $this->game_forbid_area();
+//			if($areanum >= sizeof($m->ar())){
+//				if($this->gameinfo['validnum'] == 0){
+//					$this->game_end('noplayer');
+//				}else{
+//					$this->game_end('timeup');
+//				}
+//			}
+//		}
 		
 		return;
 	}
@@ -140,6 +161,7 @@ class game_dtsp extends game_bra
 		$gameinfo['winner'] = $winner_name;
 		$gameinfo['winmode'] = $type;
 		
+		//下一局时间设为间隔时间之后
 		$gameinfo['starttime'] = time() + $game_interval * 60;//$this->get_next_game_time();
 
 		$this->insert_news('end');
@@ -668,6 +690,7 @@ EOT;
 		return $db->batch_insert('items', $data, true);
 	}
 	
+	//RUSH模式下，检测最终地图里存在多少个玩家，并冻结/解冻对应的倒计时
 	function check_all_laststand($cplayer = false){
 		global $db, $g, $m;
 		$final_region = $m->rg('type','end')->_id;
