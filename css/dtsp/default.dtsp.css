@@ -1890,6 +1890,12 @@ body{
 	overflow: auto;
 }
 
+
+#news_newslist .date{
+	color: #CCC;
+	font: bold 13px sans-serif;
+}
+
 #news_newslist .time{
 	color: #999;
 	font: bold 13px sans-serif;

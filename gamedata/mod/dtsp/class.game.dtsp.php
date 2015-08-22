@@ -729,6 +729,52 @@ EOT;
 		return;
 	}
 	
+	/**
+	 * 生成进行状况页面
+	 * 为分隔不同日期而重载此函数
+	 *
+	 * @return string 生成的内容
+	 */
+	public function render_news($players, $news)
+	{
+		$contents = '<div id="news_playerlist">';
+		foreach($players as $player){
+			$contents .=
+				'<div class="player">'.
+					'<div class="icon"><img src="'.$player['icon'].'"></div>'.
+					'<div class="info">'.
+						'<div class="name">'.$player['name'].'</div>'.
+						'<div class="number">'.$player['number'].'号</div>'.
+						'<div class="gender">'.$GLOBALS['genderinfo'][$player['gender']].'</div>'.
+						'<div class="killnum">击杀数量：'.$player['killnum'].'</div>'.
+						'<div class="level">等级：'.$player['lvl'].'</div>'.
+						'<div class="motto">座右铭：'.$player['motto'].'</div>'.
+					'</div>'.
+				'</div>';
+		}
+		$contents .= '</div>';
+		
+		$contents .= '<div id="news_newslist">';
+		$day1 = 0;
+		foreach($news as $piece){
+			$day2 = date('z', $piece['time']);
+			if($day2 != $day1){
+				$contents .= 
+					'<div class="news">'.
+						'<div class="piece"><span class="date">'.date('Y年 n月 j日', $piece['time']).'</span></div>'.
+					'</div>';
+				$day1 = $day2;
+			}
+			$contents .=
+				'<div class="news">'.
+					'<div class="piece"><span class="time">'.date('H:i:s', $piece['time']).'</span> '.$piece['content'].'</div>'.
+				'</div>';
+		}
+		$contents .= '</div>';
+		
+		return $contents;
+	}
+	
 	public function __destruct()
 	{
 //		if(isset($GLOBALS['cplayer'])){
