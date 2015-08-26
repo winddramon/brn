@@ -14,6 +14,13 @@ class command_dtsp extends command_bra
 			return;
 		}elseif($cplayer === false && $action !== 'enter_game'){
 			$a->action('locked');
+			$a->flush();
+			return;
+		}
+		
+		if(!in_array($action, array('init', 'update', 'chat_send')) && $action != '' && $g->gameinfo['gamestate'] < GAME_STATE_OPEN){
+			$a->action('game_over');
+			$a->flush();
 			return;
 		}
 		
@@ -97,7 +104,7 @@ class command_dtsp extends command_bra
 				parent::action_handler($action, $param);
 				break;
 		}
-		//最终战场特殊判定：1. 增加倒计时  2. 如果最终战场的玩家数在2以上，则暂停所有玩家的倒计时
+		//最终战场特殊判定：1. 增加倒计时  2. 如果最终战场的玩家数在2以上，则暂停所有玩家的倒计时  3. 胜利判定
 		if($g->gameinfo['gametype'] == GAME_TYPE_RUSH && $cplayer){
 			$g->check_all_laststand($cplayer);
 		}else{

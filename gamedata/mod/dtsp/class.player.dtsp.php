@@ -96,6 +96,33 @@ class player_dtsp extends player_bra
 		$this->set_region_jump();
 	}
 	
+	/**
+	 * 遍历buff函数
+	 * 对所有buff执行函数内容
+	 */
+	protected function foreach_buff($type, $func){
+		$flag = 0;
+		foreach($this->data['buff'] as &$buff){
+			if($buff['type'] == $type){
+				$flag = $func($buff);
+			}
+		}
+		return $flag;
+	}
+	
+	/**
+	 * 判定是否存在特定的buff，如果符合则返回那个buff（传值），如果没有则返回false
+	 * 
+	 */
+	public function check_buff($type){
+		foreach($this->data['buff'] as $val){
+			if($val['type'] == $type){
+				return $val;
+			}
+		}
+		return false;
+	}
+	
 	protected function set_last_stand(){
 		global $last_stand;
 		$already = false;
@@ -134,6 +161,7 @@ class player_dtsp extends player_bra
 			$this->buff('region_jump', $m->rg('_id',$this->region)->duration, array('destination' => $m->rg('_id',$this->region)->destination));
 		}
 	}
+	
 	protected function get_consumption($action)
 	{
 		$consumption = parent::get_consumption($action);
@@ -430,13 +458,14 @@ class player_dtsp extends player_bra
 		}
 	}
 	
-	public function freeze_buff($type){
+	public function freeze_buff($type, $time = 0){
 		$flag = false;
+		if($time == 0){$time = time();}
 		foreach($this->data['buff'] as &$bval){
 			if($bval['type'] == $type){
-				if($bval['time'] > 0 && $bval['time'] - time() > 0){
-					$bval['param']['duration'] = $bval['time'] - time();
-					$bval['param']['freezetime'] = time();
+				if($bval['time'] > 0 && $bval['time'] - $time > 0){
+					$bval['param']['duration'] = $bval['time'] - $time;
+					$bval['param']['freezetime'] = $time;
 					$bval['time'] = 0;
 					$this->ajax('buff', array('buff' => $this->parse_buff()));
 					$flag = true;
@@ -447,12 +476,13 @@ class player_dtsp extends player_bra
 		return $flag;
 	}
 	
-	public function unfreeze_buff($type){
+	public function unfreeze_buff($type, $time = 0){
 		$flag = false;
+		if($time == 0){$time = time();}
 		foreach($this->data['buff'] as &$bval){
 			if($bval['type'] == $type){
 				if($bval['time'] == 0 && isset($bval['param']['duration']) && isset($bval['param']['freezetime'])){
-					$bval['time'] = time() + $bval['param']['duration'];
+					$bval['time'] = $time + $bval['param']['duration'];
 					$this->ajax('buff', array('buff' => $this->parse_buff()));
 					$flag = true;
 					break;

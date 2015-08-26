@@ -19,12 +19,12 @@ if($cuser === false){
 	$a->flush();
 }
 
-if($gameinfo['gamestate'] < GAME_STATE_OPEN){
+$cplayer = $g->current_player();
+
+if($gameinfo['gamestate'] < GAME_STATE_OPEN && !$cplayer){
 	$a->action('game_over');
 	$a->flush();
 }
-
-$cplayer = $g->current_player();
 
 if(false === isset($_POST['action'])){
 	throw_error('Wrong Action');

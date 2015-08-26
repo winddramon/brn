@@ -39,6 +39,34 @@ class game_dtsp extends game_bra
 			$GLOBALS[$key] = $value;
 		}
 		
+		$this->game_tick();
+		
+		//游戏资源刷新机制，原禁区的一部分，由于剧情的更改而单独划出来
+		
+
+		
+		//回头要把NPC从禁区剥离出来
+//		while($gameinfo['areatime'] <= time() && $gameinfo['gamestate'] >= GAME_STATE_WAITING){
+//			$areanum = $this->game_forbid_area();
+//			if($areanum >= sizeof($m->ar())){
+//				if($this->gameinfo['validnum'] == 0){
+//					$this->game_end('noplayer');
+//				}else{
+//					$this->game_end('timeup');
+//				}
+//			}
+//		}
+		
+		return;
+	}
+	
+	
+	/**
+	 * 每次有页面请求都会执行的函数
+	 * 主要工作是判定并修改游戏状态
+	 */
+	protected function game_tick()
+	{
 		global $m, $game_prepare, $game_close, $game_timeup;
 		
 		$gameinfo = &$this->gameinfo;
@@ -71,23 +99,12 @@ class game_dtsp extends game_bra
 			$this->game_end('timeup');
 		}
 		
-		//游戏资源刷新机制，原禁区的一部分，由于剧情的更改而单独划出来
+		//如果游戏刷新间隔已到，则刷新一次游戏资源（借用原本areatime字段，毕竟是历史遗迹）
+		if($gameinfo['gamestate'] >= GAME_STATE_OPEN && time() > $gameinfo['areatime']){
+			$this->game_refresh_resources();
+		}
 		
-//		$this->update_mapitem($gameinfo['round']);
-//		$this->update_npc($gameinfo['round']);
-//		$this->update_shopitem($gameinfo['round']);
-		
-		//回头要把NPC从禁区剥离出来
-//		while($gameinfo['areatime'] <= time() && $gameinfo['gamestate'] >= GAME_STATE_WAITING){
-//			$areanum = $this->game_forbid_area();
-//			if($areanum >= sizeof($m->ar())){
-//				if($this->gameinfo['validnum'] == 0){
-//					$this->game_end('noplayer');
-//				}else{
-//					$this->game_end('timeup');
-//				}
-//			}
-//		}
+		//由于有玩家池缓存，判定laststand胜利部分放在command里了
 		
 		return;
 	}
@@ -328,10 +345,22 @@ EOT;
 			return 'img/dtsp/'.$gender.'_'.$icon.'.png';
 		}
 	}
-
-	protected function game_resource_refresh(){
-		global $a, $db, $gameinfo, $map, $mapsize, $round_area, $weatherinfo, $normal_weather, $combo_round;
-
+	
+	/**
+	 * 刷新游戏资源
+	 * 原禁区函数废弃
+	 *
+	 */
+	protected function game_refresh_resources()
+	{
+		$gameinfo = &$this->gameinfo;
+		$gameinfo['round'] ++;
+		$gameinfo['areatime'] = $this->get_next_areatime();
+		cache_write('gameinfo.serialize', serialize($this->gameinfo));
+		$this->update_mapitem($gameinfo['round']);
+		$this->update_npc($gameinfo['round']);
+		$this->update_shopitem($gameinfo['round']);
+		return;
 	}
 
 	protected function np_generate_club(&$user)
@@ -339,7 +368,7 @@ EOT;
 		return (isset($GLOBALS['param']['club']) && $GLOBALS['param']['club'] > 0 && $GLOBALS['param']['club'] < sizeof($GLOBALS['clubinfo'])) ? $GLOBALS['param']['club'] : $GLOBALS['g']->random(1, sizeof($GLOBALS['clubinfo']) - 1);
 	}
 	
-	public function game_forbid_area()
+	public function game_forbid_area()//已经废弃
 	{
 		$return = game::game_forbid_area(); //不调用BRA的禁区（BRA实现了禁区死亡），直接调用BRN的禁区，然后重新实现禁区死亡
 		
@@ -691,9 +720,12 @@ EOT;
 	}
 	
 	//RUSH模式下，检测最终地图里存在多少个玩家，并冻结/解冻对应的倒计时
-	function check_all_laststand($cplayer = false){
+	function check_all_laststand($cplayer = false, $time = 0){
 		global $db, $g, $m;
+		if($time == 0){$time = time();}
+		if($g->gameinfo['gamestate'] < GAME_STATE_OPEN){return;}//判定游戏是否已经结束
 		$final_region = $m->rg('type','end')->_id;
+		
 		if($cplayer){//如果传参则单独判定$cplayer防止忽略缓存
 			$llist = $db->select('players', '_id', array('_id' =>array('$ne' => $cplayer->_id), 'type' => GAME_PLAYER_USER, 'region' => $final_region, 'hp' => array('$gt' => 0)));
 			if($cplayer->region == $final_region){
@@ -716,11 +748,18 @@ EOT;
 				$lplayer = new_player($lpdata);
 			}
 			if($lnum >= 2){//冻结全部
-				if($lplayer->freeze_buff('last_stand')){
+				if($lplayer->freeze_buff('last_stand',$time)){//如果返回true说明状态有切换
 					$lplayer->feedback('由于有敌人存在，你的倒计时停止了！');
 				}	
 			}else{//解冻全部（只有一个）
-				if($lplayer->unfreeze_buff('last_stand')){
+				//获胜者开启游戏界面的情况下，由$player->remove_buff()来判定胜利（执行点位于player类的构造函数，先于此处执行）
+				//但在理应获胜者并没有提交指令的情况下，需要在这里判断其是否胜利
+				$lp_buff = $lplayer->check_buff('last_stand');
+				if($lp_buff && $lp_buff['time'] != 0 && $time >= $lp_buff['time']){
+					$g->game_end('laststand', $lplayer, 'individual');
+				}
+				//除外的情况下，重启倒计时
+				if($lplayer->unfreeze_buff('last_stand',$time)){
 					$lplayer->feedback('由于敌人消失，你的倒计时重启了！');
 				}	
 			}							
