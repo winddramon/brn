@@ -72,30 +72,30 @@ class game_dtsp extends game_bra
 		$gameinfo = &$this->gameinfo;
 		//创建地图对象——之所以放在这里是因为接下来的游戏判断马上就要用到map_container类的方法
 		$m = new map_container_dtsp();
-
+		
 		//游戏准备时间到时，进行游戏准备（重设各类参数、放置道具和NPC等，0禁按理也应放在这里），游戏状态变为GAME_STATE_WAITING
-		if($gameinfo['gamestate'] === GAME_STATE_CLOSED && time() > $gameinfo['starttime'] - $game_prepare * 60){
+		if($gameinfo['gamestate'] == GAME_STATE_CLOSED && time() > $gameinfo['starttime'] - $game_prepare * 60){
 			$this->game_prepare();
 		}
 		
 		//游戏开始时间到时，真正放玩家入场，游戏状态变为GAME_STATE_OPEN
-		if($gameinfo['gamestate'] === GAME_STATE_WAITING && time() > $gameinfo['starttime']){
+		if($gameinfo['gamestate'] == GAME_STATE_WAITING && time() > $gameinfo['starttime']){
 			$this->game_start();
 		}
 		
 		//游戏锁定时间到时，停止激活（玩家不能再进入游戏），游戏状态变为GAME_STATE_LOCKED
 		//游戏状态改变为GAME_STATE_CLOSED是在game_end()里完成
-		if($gameinfo['gamestate'] === GAME_STATE_OPEN && time() > $gameinfo['starttime'] + $game_close * 60){
+		if($gameinfo['gamestate'] == GAME_STATE_OPEN && time() > $gameinfo['starttime'] + $game_close * 60){
 			$this->game_lock();
 		}
 		
 		//游戏锁定时间到时依然没有玩家，那么游戏结束
-		if($gameinfo['gamestate'] === GAME_STATE_LOCKED && $gameinfo['validnum'] <= 0){
+		if($gameinfo['gamestate'] == GAME_STATE_LOCKED && $gameinfo['validnum'] <= 0){
 			$this->game_end('noplayer');
 		}
 		
 		//游戏超过强制结束的时间限制，那么游戏结束
-		if($gameinfo['gamestate'] === GAME_STATE_LOCKED && time() > $gameinfo['starttime'] + $game_timeup * 60){
+		if($gameinfo['gamestate'] == GAME_STATE_LOCKED && time() > $gameinfo['starttime'] + $game_timeup * 60){
 			$this->game_end('timeup');
 		}
 		
