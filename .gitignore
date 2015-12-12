@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 a.txt
 cache/comet/1.txt
 cache/comet/2.txt
@@ -18,3 +19,7 @@ gamedata/mod/dtsp/class.combat.dtsp - 副本.php
 gamedata/mod/dtsp/images/test.jpg
 img/i_hayashida.gif
 php_errors.log
+=======
+cache
+gamedata/config.php
+>>>>>>> pr/5
