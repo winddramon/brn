@@ -11,21 +11,25 @@ class map_container_dtsp
 		$this->load_static();
 		$this->load_active();
 	}
-
+	//TODO：开局直接生成带有全部地图数据的json并存入数据库
 	public function load_static()
 	{//载入settings静态数据
 		global $regioninfo, $mapinfo;
-		foreach ($mapinfo as $mval) {
-			$this->areas_static[$mval['_id']] = new area_dtsp($mval);
-		}
+//		foreach ($mapinfo as $mval) {
+//			$this->areas_static[$mval['_id']] = new area_dtsp($mval);
+//		}
 		foreach ($regioninfo as $rval) {
 			$this->regions[$rval['_id']] = new region_dtsp($rval);
 			foreach ($rval['group'] as $rgval) {
-				foreach ($rgval['arealist'] as $lval) {
-					if (isset($this->areas_static[$lval])) {
-						$this->areas_static[$lval]->r = $rval['_id'];
-					}
+				foreach ($rgval['mapinfo'] as $mival){
+					$mival['r'] = $rval['_id'];
+					$this->areas_static[$mival['_id']] = new area_dtsp($mival);
 				}
+//				foreach ($rgval['arealist'] as $lval) {
+//					if (isset($this->areas_static[$lval])) {
+//						$this->areas_static[$lval]->r = $rval['_id'];
+//					}
+//				}
 			}
 		}
 	}
@@ -51,17 +55,25 @@ class map_container_dtsp
 		foreach ($this->regions as $robj) {
 			foreach ($robj->group as $rgval) {
 				if ($rgval['num'] < 0) {//先把全部固定地图标注完毕
-					foreach ($rgval['arealist'] as $lval) {
-						$map_coordinates[] = $this->areas_static[$lval]->c;
-						$maplist[] = $this->areas_static[$lval]->data;
+					foreach ($rgval['mapinfo'] as $mival){
+						$map_coordinates[] = $this->areas_static[$mival['_id']]->c;
+						$maplist[] = $this->areas_static[$mival['_id']]->data;
 					}
+//					foreach ($rgval['arealist'] as $lval) {
+//						$map_coordinates[] = $this->areas_static[$lval]->c;
+//						$maplist[] = $this->areas_static[$lval]->data;
+//					}
 				}
 			}
 		}
 		foreach ($this->regions as $robj) {//之后分配随机地图。这个参数是0的地图完全不放置
 			foreach ($robj->group as $rgval) {
 				if ($rgval['num'] > 0) {
-					$list = $rgval['arealist'];
+					$list = array();
+					foreach ($rgval['mapinfo'] as $mival){
+						$list[] = $mival['_id'];
+					}
+//					$list = $rgval['arealist'];
 					shuffle($list);
 					$mlist = array_slice($list, 0, $rgval['num']);
 					foreach ($mlist as $lval) {
