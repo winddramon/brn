@@ -253,15 +253,20 @@ function respond(data){
                 var map_size = param['regioninfo']['displaysize'];
 
                 for(var my = 0; my < 10; my ++){
+                    if(my > map_size[1]){
+                        $('div[row='+ my +']').hide();
+                    }else{
+                        $('div[row='+ my +']').show();
+                    }
                     for(var mx = 0; mx < 10; mx ++){
                         var map_coor = mx+'-'+my;
                         if($('div[coor='+ map_coor +']').length > 0){
                             $('div[coor='+ map_coor +']').attr('mid','-1');
                             $('div[coor='+ map_coor +'] div')[0].innerHTML = '';
                             if(mx > map_size[0] || my > map_size[1]){
-                                $('div[coor='+ map_coor +']')[0].display = 'hidden';
+                                $('div[coor='+ map_coor +']').hide();
                             }else{
-                                $('div[coor='+ map_coor +']')[0].display = 'block';
+                                $('div[coor='+ map_coor +']').show();
 
                             }
                         }

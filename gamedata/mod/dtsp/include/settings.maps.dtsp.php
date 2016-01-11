@@ -1,6 +1,6 @@
 <?php
 
-$map_size = array(4, 4);//从0开始
+$map_size = array(5, 5);//从0开始
 
 $regioninfo = array(
 	array(

@@ -5,7 +5,7 @@
 		global $map_size;//读取地图长宽等
 		
 		for($y = 0; $y <= $map_size[1]; $y ++){
-			?><div class="map_row"><?php
+			?><div class="map_row" row="<?php echo strval($y); ?>"><?php
 			for($x = 0; $x <= $map_size[0]; $x ++){
 				?><div class="map_block" coor=<?php
 				echo strval($x).'-'.strval($y);
