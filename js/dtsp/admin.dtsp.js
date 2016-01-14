@@ -16,7 +16,7 @@ $(document).ready(function(){
 			if(data['success']){
 				alert("游戏已重新开始!");
 			}else{
-				alert("操作失败");
+				alert("操作失败"+JSON.stringify(data));
 			}
 		}, "json");
 	});

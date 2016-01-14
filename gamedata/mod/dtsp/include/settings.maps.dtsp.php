@@ -1,6 +1,6 @@
 <?php
 
-$map_size = array(5, 5);//从0开始
+$map_size = array(6, 6);//从0开始
 
 $regioninfo = array(
 	array(
@@ -11,14 +11,14 @@ $regioninfo = array(
 		'access' => false,			//区域入口: 0或者正数为地图编号，负数为该等级随机
 		'duration' => 0,
 		'displaysize' => array(2,2),
-		'background' => 'region0.png',
+		'background' => 'capital.jpg',
 		'group' => array(
 			'static' => array(
 				'num' => -1,
 //				'arealist' => array(0, 1, 2, 3),
 				'mapinfo' => array(
-					array('_id'=>0, 'n'=>'市政厅', 'c'=>'1-1'),
-					array('_id'=>1, 'n'=>'城门', 'c'=>'1-2'),
+					array('_id'=>0, 'n'=>'首都广场', 'c'=>'1-1'),
+					array('_id'=>1, 'n'=>'城门', 'c'=>'1-0'),
 					array('_id'=>2, 'n'=>'市场', 'c'=>'2-1'),
 					array('_id'=>3, 'n'=>'住宅区', 'c'=>'0-0')
 				)
@@ -33,22 +33,22 @@ $regioninfo = array(
 		'access' => 101,
 		'duration' => 300,
 		'displaysize' => array(4,4),
-		'background' => 'region1.png',
+		'background' => 'railroad.jpg',
 		'group' => array(
 			'static' => array(
 				'num' => -1,
 //				'arealist' => array(101,102),
 				'mapinfo' => array(
-					array('_id' => 101, 'n' => '检查站', 'c' => '3-3',),
+					array('_id' => 101, 'n' => '检查站', 'c' => '1-1',),
 					array('_id' => 102, 'n' => '西森林', 'c' => '0-2',),
 					array('_id' => 103, 'n' => '东森林', 'c' => '4-2',),
-					array('_id' => 104, 'n' => '废弃列车', 'c' => '3-2',)
+					array('_id' => 104, 'n' => '废弃列车', 'c' => '3-3',)
 				)
 			),
 			'random' => array(
 				'num' => 2,
 //				'arealist' => array(151,152),
-				'randomcoors' => array('0-1','1-1','2-1','3-1','4-1','1-2','2-2','0-3','1-3','2-3','4-3','1-4','2-4','3-4'),
+				'randomcoors' => array('0-1','2-1','3-1','4-1','1-2','2-2','0-3','1-3','2-3','4-3','1-4','2-4','3-4'),
 				'mapinfo' => array(
 					array('_id' => 151, 'n' => '燃烧的阵地',),
 					array('_id' => 152, 'n' => '废弃的阵地',),
@@ -66,23 +66,23 @@ $regioninfo = array(
 		'access' => 201,
 		'duration' => 300,
 		'displaysize' => array(4,4),
-		'background' => 'region2.png',
+		'background' => 'nightcity.jpg',
 		'group' => array(
 			'static' => array(
 				'num' => -1,
 //				'arealist' => array(201,202)
 				'mapinfo' => array(
-					array('_id' => 201, 'n' => '监视塔', 'c' => '2-2',),
+					array('_id' => 201, 'n' => '监视塔', 'c' => '2-1',),
 					array('_id' => 202, 'n' => '核反应堆', 'c' => '3-2',),
-					array('_id' => 203, 'n' => '仓库', 'c' => '3-1',),
-					array('_id' => 204, 'n' => '生活北区', 'c' => '1-1',),
-					array('_id' => 205, 'n' => '生活南区', 'c' => '1-3',)
+					array('_id' => 203, 'n' => '仓库', 'c' => '2-1',),
+					array('_id' => 204, 'n' => '生活北区', 'c' => '1-2',),
+					array('_id' => 205, 'n' => '生活南区', 'c' => '2-4',)
 				)
 			),
 			'random' => array(
 				'num' => 1,
 //				'arealist' => array(251,252),
-				'randomcoors' => array('2-0','0-1','0-2','0-3','2-3','2-4'),
+				'randomcoors' => array('0-3','1-3','2-3','3-3','4-3','1-4','3-4'),
 				'mapinfo' => array(
 					array('_id' => 251, 'n' => '流动集市',),
 					array('_id' => 252, 'n' => '机动哨站',),
@@ -100,18 +100,18 @@ $regioninfo = array(
 		'access' => 301,
 		'duration' => 300,
 		'displaysize' => array(5,5),
-		'background' => 'region3.png',
+		'background' => 'ship.jpg',
 		'group' => array(
 			'static' => array(
 				'num' => -1,
 //				'arealist' => array(301,302)
 				'mapinfo' => array(
-					array('_id' => 301, 'n' => '舰桥', 'c' => '3-2',),
-					array('_id' => 302, 'n' => '时流引擎', 'c' => '1-1',),
+					array('_id' => 301, 'n' => '舰桥', 'c' => '2-2',),
+					array('_id' => 302, 'n' => '时流引擎', 'c' => '1-2',),
 					array('_id' => 303, 'n' => '传送装置', 'c' => '1-3',),
 					array('_id' => 304, 'n' => '作战室', 'c' => '4-2',),
-					array('_id' => 305, 'n' => '储藏室A', 'c' => '1-4',),
-					array('_id' => 306, 'n' => '储藏室B', 'c' => '4-4',)
+					array('_id' => 305, 'n' => '储藏室A', 'c' => '2-1',),
+					array('_id' => 306, 'n' => '储藏室B', 'c' => '2-4',)
 				)
 			),
 			'random' => array(
@@ -134,8 +134,8 @@ $regioninfo = array(
 		'destination' => 5,
 		'access' => -1,
 		'duration' => 300,
-		'displaysize' => array(5,5),
-		'background' => 'region4.png',
+		'displaysize' => array(6,6),
+		'background' => 'hj.jpg',
 		'group' => array(
 			'static' => array(
 				'num' => -1,
@@ -144,17 +144,17 @@ $regioninfo = array(
 					array('_id' => 401, 'n' => '指挥中心', 'c' => '4-2',),
 					array('_id' => 402, 'n' => '北废弃村舍', 'c' => '2-1',),
 					array('_id' => 403, 'n' => '南废弃村舍', 'c' => '4-5',),
-					array('_id' => 404, 'n' => '灯塔', 'c' => '4-6',),
-					array('_id' => 405, 'n' => '隧道', 'c' => '2-5',),
-					array('_id' => 406, 'n' => '废弃校舍', 'c' => '1-4',),
+					array('_id' => 404, 'n' => '灯塔', 'c' => '5-6',),
+					array('_id' => 405, 'n' => '隧道', 'c' => '2-4',),
+					array('_id' => 406, 'n' => '废弃校舍', 'c' => '1-3',),
 					array('_id' => 407, 'n' => '清水池', 'c' => '2-2',),
-					array('_id' => 408, 'n' => '诊所', 'c' => '5-5',)
+					array('_id' => 408, 'n' => '诊所', 'c' => '5-4',)
 				)
 			),
 			'random' => array(
 				'num' => 2,
 //				'arealist' => array(451,452),
-				'randomcoors' => array('3-3','3-4','3-5','4-3','4-4','5-3','5-4'),
+				'randomcoors' => array('3-3','3-4','3-5','4-3','4-4'),
 				'mapinfo' => array(
 					array('_id' => 451, 'n' => '森林',),
 					array('_id' => 452, 'n' => '沼泽',),
@@ -172,7 +172,7 @@ $regioninfo = array(
 		'access' => 501,
 		'duration' => 300,
 		'displaysize' => array(4,4),
-		'background' => 'region5.png',
+		'background' => 'airfortress.jpg',
 		'group' => array(
 			'static' => array(
 				'num' => -1,
@@ -206,83 +206,24 @@ $regioninfo = array(
 		'destination' => false,
 		'access' => 601,
 		'duration' => 300,
-		'displaysize' => array(2,2),
-		'background' => 'region6.png',
+		'displaysize' => array(4,4),
+		'background' => 'final.jpg',
 		'group' => array(
 			'static' => array(
 				'num' => -1,
 //				'arealist' => array(901,902)
 				'mapinfo' => array(
-					array('_id' => 601, 'n' => '飞行要塞「虹铸」', 'c' => '1-0',),
+					array('_id' => 601, 'n' => '飞行要塞「虹铸」', 'c' => '2-0',),
 					array('_id' => 602, 'n' => '驿葵莎之门', 'c' => '2-2',),
-					array('_id' => 603, 'n' => '莫洛克传送艇', 'c' => '3-4',),
-					array('_id' => 604, 'n' => '驿葵莎之门西北', 'c' => '1-1',),
-					array('_id' => 605, 'n' => '驿葵莎之门东北', 'c' => '3-1',),
-					array('_id' => 606, 'n' => '驿葵莎之门正东', 'c' => '4-2',),
-					array('_id' => 607, 'n' => '驿葵莎之门东南', 'c' => '3-3',),
-					array('_id' => 608, 'n' => '驿葵莎之门西南', 'c' => '1-3',),
-					array('_id' => 609, 'n' => '驿葵莎之门正西', 'c' => '0-2',)
+					array('_id' => 603, 'n' => '莫洛克传送艇', 'c' => '2-4',),
+					array('_id' => 604, 'n' => '西北角', 'c' => '1-1',),
+					array('_id' => 605, 'n' => '东北角', 'c' => '3-1',),
+					array('_id' => 606, 'n' => '正东角', 'c' => '4-2',),
+					array('_id' => 607, 'n' => '东南角', 'c' => '3-3',),
+					array('_id' => 608, 'n' => '西南角', 'c' => '1-3',),
+					array('_id' => 609, 'n' => '正西角', 'c' => '0-2',)
 				)
 			)
 		)
 	)
-);
-$mapinfo = array(
-	array(
-		'_id' => 0,
-		'n' => '阿玛蒂娅邸',
-		'c' => '1-1',
-	),
-	array(
-		'_id' => 1,
-		'n' => '城门',
-		'c' => '2-0',
-	),
-	array(
-		'_id' => 101,
-		'n' => '废弃旅馆',
-		'c' => '2-2',
-	),
-	array(
-		'_id' => 102,
-		'n' => '森林',
-		'c' => '0-3',
-	),
-	array(
-		'_id' => 151,
-		'n' => '村落',
-	),
-	array(
-		'_id' => 152,
-		'n' => '废弃营地',
-	),
-	array(
-		'_id' => 201,
-		'n' => '动力室',
-		'c' => '2-2',
-	),
-	array(
-		'_id' => 202,
-		'n' => '「蜡翼天马」设备',
-		'c' => '0-1',
-	),
-	array(
-		'_id' => 251,
-		'n' => '武器库',
-	),
-	array(
-		'_id' => 252,
-		'n' => '对空炮台',
-	),
-	array(
-		'_id' => 901,
-		'n' => '驿葵莎之门',
-		'c' => '2-2',
-	),
-	array(
-		'_id' => 902,
-		'n' => '「虹铸」',
-		'c' => '0-0',
-	)
-
 );

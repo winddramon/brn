@@ -353,6 +353,11 @@ body{
 	background: rgba(16, 64, 16, 0.67);
 }
 
+#F-consol-map-background{
+    width:490px;
+    height:490px;
+}
+
 #F-console-map .map_block{
 	display: flex;
 	flex-grow:1;

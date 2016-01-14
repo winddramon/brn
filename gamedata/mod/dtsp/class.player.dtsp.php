@@ -313,20 +313,24 @@ class player_dtsp extends player_bra
 	{
 		switch($name){
 			//新buff直接覆盖旧buff
-			case 'last_stand':
+			case 'last_stand'://获得的时候直接抹消region_jump状态
+				foreach($this->data['buff'] as $bid=>&$buff){
+					if($buff['type'] === 'region_jump'){
+						$this->remove_buff($bid);
+					}
+				}
 			case 'region_jump':
 				foreach($this->data['buff'] as &$buff){
 					if($buff['type'] === $name){
-						$buff['duration'] = ($duration == 0) ? 0 : time() + $duration;
+						$buff['time'] = ($duration == 0) ? 0 : time() + $duration;
 						$buff['param'] = array_merge($buff['param'], $param);
 						$this->ajax('buff', array('buff' => $this->parse_buff()));
-						return;
+						return;//直接返回了，后面没执行
 					}
 				}
 				break;
 			//不叠加新buff而是在存在buff上增加时长
-			case 'last_stand':
-			case 'region_jump':
+
 			case 'tolerance':
 			case 'invincible':
 			case 'scarlet_moonlight':
@@ -371,7 +375,7 @@ class player_dtsp extends player_bra
 		}
 		
 		parent::buff($name, $duration, $param);
-		
+
 		switch($name){
 			case 'ageless_dream':
 				$hr = $this->get_heal_rate();
@@ -492,7 +496,7 @@ class player_dtsp extends player_bra
 		return $flag;
 	}
 	
-	public function remove_buff($key)
+	public function remove_buff($key, $ignore = false)
 	{
 		global $g;
 		$buff = $this->data['buff'][$key];
@@ -503,13 +507,13 @@ class player_dtsp extends player_bra
 		switch($buff['type']){
 			case 'last_stand':
 				global $m,$g;
-				if($this->region == $m->rg('type','end')->_id){
+				if(!$ignore && $this->region == $m->rg('type','end')->_id){
 					$g->game_end('laststand', $this, 'individual');
 				}
 				break;
 			case 'region_jump':
 				global $m;
-				if($buff['param']['destination'] == $m->rg('_id',$this->region)->destination){//条件：所在地图的区域的目的地与buff记载的目的地相同
+				if(!$ignore && $buff['param']['destination'] == $m->rg('_id',$this->region)->destination){//条件：所在地图的区域的目的地与buff记载的目的地相同
 					$this->move($m->get_region_access($buff['param']['destination']), true, true);
 					$this->feedback('时间到了，必须得移动了！');
 				}

@@ -291,7 +291,7 @@ class item_dtsp extends item_bra
 			$this->player->error('跨区移动参数错误1');
 			return;
 		}
-		$region = $this->data['sk']['region'];
+		$region = $this->player->region+1;
 		$destination = $m->get_region_access($region);
 //		$mapname = $m->ar($destination);
 		$this->player->feedback('你使用了'.$this->data['n'].'，跨越了区域的限制。');

@@ -602,7 +602,7 @@ EOT;
 		unset($column);
 		
 		/*==================Items Initialization==================*/
-		$column = file_get_contents('gamedata/sql/items.sql');
+		$column = file_get_contents(get_mod_path('dtsp').'/sql/items.dtsp.sql');
 		$db->create_table('items', $column);
 		unset($column);
 		
@@ -665,12 +665,18 @@ EOT;
 			throw_error('Failed to open data file.');
 		}
 		$alllist = $m->ar();//TODO:编号为0的区域应该排除
+		$allregion = $m->rg();
+		$regionarea = Array();//获得每个区域已经生成的地图的id数组
+		foreach($allregion as $arval){
+			$regionarea[$arval] = array_keys($m->ar('r',$arval));
+		}
 		
 		$data = array();
 		while(!feof($fp)){
-			$line = fgets($fp, 4096);
+			$line = fgets($fp);
 			
-			if(!$line || substr($line, 0, 2) == '//' || substr($line, 0, 1) == '#' || substr($line, 0, 1) == ';'){
+			if(!$line || !is_numeric(substr($line, 0, 1))){//第1个字符不是数字的行全部忽略
+				//file_put_contents('a.txt',substr($line, 0, 1),FILE_APPEND);
 				continue;
 			}
 			
@@ -698,21 +704,37 @@ EOT;
 			if(intval($item[0]) !== intval($round) && $item[0] != 99){
 				continue;
 			}
-			
-			for($i = 0; $i < $item[2]; $i++){
-				$item[1] = intval($item[1]);
-				if(in_array($item[1], $alllist) || intval($item[1]) == 99){//游戏中已有的地点才刷新物品
-					$itemdata = array(
-						'area' => $item[1] == 99 ? $alllist[array_rand($alllist)] : $item[1],
-						'itm' => $item[3],
-						'itmk' => $item[4],
-						'itme' => intval($item[5]),
-						'itms' => intval($item[6]),
-						'itmsk' => isset($item[7]) ? $item[7] : ''
-						);
-					$this->convert_item($itemdata);
-					$data[] = $itemdata;
+
+			if(strpos($item[1],' ')!==false) {//如果地点里有空格，则认为地点是由空格分断的数组，取其中之一
+				$item[1] = explode(' ', $item[1]);
+			}elseif(strpos($item[1],'R')===0){//如果地点以R开头则认为是随机
+				if(strpos($item[1],'RA')===0){//如果以RA开头则认为全图随机
+					$item[1] = $alllist;
+				}else{//此外则认为R之后的数字代表特定区域地图随机
+					$item[1] = $regionarea[intval(substr($item[1],1))];
 				}
+			}else{
+				$item[1] = intval($item[1]);
+			}
+
+			for($i = 0; $i < $item[2]; $i++){
+				if(is_array($item[1])){//如果是数组则随机选一个
+					$itemarea = $item[1][array_rand($item[1])];
+				}else{
+					$itemarea = $item[1];
+				}
+				$itemdata = array(
+
+					'area' => $itemarea,
+					'itm' => $item[3],
+					'itmk' => $item[4],
+					'itme' => intval($item[5]),
+					'itms' => intval($item[6]),
+					'itmsk' => isset($item[7]) ? $item[7] : ''
+					);
+				$this->convert_item($itemdata);
+				$data[] = $itemdata;
+
 			}
 		}
 		

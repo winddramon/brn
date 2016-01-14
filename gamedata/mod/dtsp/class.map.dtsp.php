@@ -51,7 +51,7 @@ class map_container_dtsp
 	public function reset_active()
 	{
 		global $g, $map_size;
-		$maplist = $map_coordinates = array();
+		$maplist = array();
 		foreach ($this->regions as $robj) {
 			foreach ($robj->group as $rgval) {
 				if ($rgval['num'] < 0) {//先把全部固定地图标注完毕
@@ -67,6 +67,7 @@ class map_container_dtsp
 			}
 		}
 		foreach ($this->regions as $robj) {//之后分配随机地图。这个参数是0的地图完全不放置
+			$map_coordinates = array();
 			foreach ($robj->group as $rgval) {
 				if ($rgval['num'] > 0) {
 					$list = array();
@@ -84,7 +85,7 @@ class map_container_dtsp
 							$mcoor = $rgval['randomcoors'][0];
 							//$mcoor = $g->random(0, $map_size[0]) . '-' . $g->random(0, $map_size[1]);
 							if ($i >= 1000) {
-								throw_error('Initiating maps failed.');
+								throw_error('Initiating maps failed. '.$mival['_id']);
 							}
 							$i++;
 						} while (in_array($mcoor, $map_coordinates));
@@ -138,7 +139,7 @@ class map_container_dtsp
 
 				if ($aobj->r == $p) {
 
-					$alist[] = $aobj;
+					$alist[$aobj->_id] = $aobj;
 				}
 			}
 			//file_put_contents('a.txt', serialize($alist));

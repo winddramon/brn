@@ -78,7 +78,7 @@ switch($action){
 				
 			case 'game_restart':
 				$g->game_end('restart');
-				$g->gameinfo['starttime'] = time()+30;
+				$g->gameinfo['starttime'] = time()+0;//30;
 				$g->game_prepare();
 				$data['success'] = true;
 				break;
