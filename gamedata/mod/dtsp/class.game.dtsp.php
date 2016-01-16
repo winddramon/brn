@@ -67,11 +67,11 @@ class game_dtsp extends game_bra
 	 */
 	protected function game_tick()
 	{
-		global $m, $game_prepare, $game_close, $game_timeup;
+		global $m, $db, $game_prepare, $game_close, $game_timeup;
 		
 		$gameinfo = &$this->gameinfo;
 		//创建地图对象——之所以放在这里是因为接下来的游戏判断马上就要用到map_container类的方法
-		$m = new map_container_dtsp();
+		$m = new map_container_dtsp($db);
 		
 		//游戏准备时间到时，进行游戏准备（重设各类参数、放置道具和NPC等，0禁按理也应放在这里），游戏状态变为GAME_STATE_WAITING
 		if($gameinfo['gamestate'] == GAME_STATE_CLOSED && time() > $gameinfo['starttime'] - $game_prepare * 60){
@@ -594,6 +594,9 @@ EOT;
 		$gameinfo['gamestate'] = GAME_STATE_CLOSED;
 		
 		/*===================Maps Initialization==================*/
+		$column = file_get_contents(get_mod_path('dtsp').'/sql/areas.dtsp.sql');
+		$db->create_table('areas', $column);
+		unset($column);
 		$m->reset_active();
 		
 		/*==================Shops Initialization==================*/

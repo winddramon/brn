@@ -28,6 +28,9 @@ $db->set_table_prefix(DB_TABLE_PREFIX);
 $column = file_get_contents(ROOT_DIR.'/gamedata/sql/users.sql');
 $db->create_table('users', $column);
 
+$column = file_get_contents(ROOT_DIR.'/gamedata/mod/dtsp/sql/areas.dtsp.sql');
+$db->create_table('areas', $column);
+
 $column = file_get_contents(ROOT_DIR.'/gamedata/mod/dtsp/sql/gameinfo.dtsp.sql');
 $db->create_table('gameinfo', $column);
 $db->insert('gameinfo', array(

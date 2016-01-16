@@ -2,15 +2,48 @@
 
 class map_container_dtsp
 {
+	protected $db;
 	protected $regions = array();
 	protected $areas = array();
 	protected $areas_static = array();
 
-	public function __construct()
+	public function __construct($db)
 	{
+		$this->db = $db;
 		$this->load_static();
-		$this->load_active();
+		$this->load_database();
 	}
+
+	public function load_database(){
+
+		$areas = $this->db->select('areas', '*');
+		if(!empty($areas)){
+			$this->areas = Array();
+			foreach($areas as $aval){
+				$this->areas[$aval['_id']] = new area_dtsp($aval);
+			}
+		}
+	}
+
+	public function save_database(){
+		$areas = $this->areas;
+		if ($areas) {
+			$maplist = Array();
+			foreach ($this->areas as $mobj) {
+				$maplist[] = Array(
+					'_id' => $mobj->_id,
+					'n' => $mobj->n,
+					'c' => $mobj->c,
+					'r' => $mobj->r,
+					'info' => $mobj->info
+				);
+			}
+			if(!empty($maplist)){
+				$this->db->batch_update('areas',$maplist);
+			}
+		}
+	}
+
 	//TODO：开局直接生成带有全部地图数据的json并存入数据库
 	public function load_static()
 	{//载入settings静态数据
@@ -34,23 +67,23 @@ class map_container_dtsp
 		}
 	}
 
-	public function load_active($maplist = array())
-	{//把gameinfo动态数据和静态数据合并
-		global $g;
-		if (empty($maplist)) {
-			$maplist = $g->gameinfo['maplist'];
-		}
-		if ($maplist) {
-			$this->areas=array();
-			foreach ($maplist as $mval) {
-				$this->areas[$mval['_id']] = new area_dtsp(array_merge($this->areas_static[$mval['_id']]->data, $mval));
-			}
-		}
-	}
+//	public function load_active($maplist = array())
+//	{//把gameinfo动态数据和静态数据合并，废弃中
+//		global $g;
+//		if (empty($maplist)) {
+//			$maplist = $g->gameinfo['maplist'];
+//		}
+//		if ($maplist) {
+//			$this->areas=array();
+//			foreach ($maplist as $mval) {
+//				$this->areas[$mval['_id']] = new area_dtsp(array_merge($this->areas_static[$mval['_id']]->data, $mval));
+//			}
+//		}
+//	}
 
 	public function reset_active()
 	{
-		global $g, $map_size;
+		//global $g, $map_size;
 		$maplist = array();
 		foreach ($this->regions as $robj) {
 			foreach ($robj->group as $rgval) {
@@ -96,27 +129,31 @@ class map_container_dtsp
 				}
 			}
 		}
-
-//		file_put_contents('a.txt',serialize($maplist));
-		$this->load_active($maplist);
-
-		$this->set_active();
-	}
-
-	public function set_active()
-	{//把动态数据写入gameinfo
-		global $g;
-		if ($this->areas) {
-			$maplist = Array();
-			foreach ($this->areas as $mobj) {
-				$maplist[] = Array(
-					'_id' => $mobj->_id,
-					'c' => $mobj->c
-				);
-			}
-			$g->gameinfo['maplist'] = $maplist;
+		$this->areas = Array();
+		foreach ($maplist as $mval) {
+			$this->areas[$mval['_id']] = new area_dtsp(array_merge($this->areas_static[$mval['_id']]->data, $mval));
 		}
+//		file_put_contents('a.txt',serialize($maplist));
+		//$this->load_active($maplist);
+		$this->save_database();
+
+		//$this->set_active();
 	}
+
+//	public function set_active()
+//	{//把动态数据写入gameinfo，已废弃
+//		global $g;
+//		if ($this->areas) {
+//			$maplist = Array();
+//			foreach ($this->areas as $mobj) {
+//				$maplist[] = Array(
+//					'_id' => $mobj->_id,
+//					'c' => $mobj->c
+//				);
+//			}
+//			$g->gameinfo['maplist'] = $maplist;
+//		}
+//	}
 
 	public function ar($c = 'allkeys', $p = '')
 	{//自动识别是地图编号还是坐标，并返回地图对象
@@ -217,6 +254,7 @@ class area_dtsp
 		$this->data['n'] = $data['n'];
 		$this->data['c'] = isset($data['c']) ? $data['c'] : false;
 		$this->data['r'] = isset($data['r']) ? $data['r'] : false;
+		$this->data['info'] = isset($data['info']) ? $data['info'] : false;
 	}
 
 	public function update($data)
