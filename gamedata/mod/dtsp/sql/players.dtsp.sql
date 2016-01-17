@@ -4,6 +4,8 @@
   type tinyint NOT NULL default '0',
   name varchar(15) NOT NULL default '',
   gender char(1) NOT NULL default 'm',
+  side tinyint unsigned NOT NULL default '0',
+  species tinyint unsigned NOT NULL default '0',
   number smallint unsigned NOT NULL default '0',
   icon varchar(50) NOT NULL default 'img/question.gif',
   club tinyint unsigned NOT NULL default '0',

@@ -10,6 +10,10 @@ $explode_move_modulus = 0.9;
 
 $base_aware_time = 5;
 
+$base_distance = 5;//战斗开始的距离
+
+$combat_time_limit = 8;//战斗的时间限制
+
 $base_attack_range = array(
 	'p' => 1,
 	'k' => 1.5,
@@ -19,19 +23,19 @@ $base_attack_range = array(
 );
 
 $base_preload = array(
-	'p' => 1.25,
-	'k' => 1.25,
-	'g' => 0,
-	'c' => 1,
-	'd' => 2.5
+	'p' => 2.5,
+	'k' => 2.5,
+	'g' => 3,
+	'c' => 1.5,
+	'd' => 5
 );
 
 $base_overload = array(
-	'p' => 0.25,
-	'k' => 0.25,
-	'g' => 1,
+	'p' => 1,
+	'k' => 1,
+	'g' => 2,
 	'c' => 0.5,
-	'd' => 0
+	'd' => 0.5
 );
 
 $base_ammo_reload = 4;
@@ -101,16 +105,16 @@ class combat_dtsp extends combat
 	
 	public function battle_start()
 	{
-		global $g;
+		global $g,$base_distance,$combat_time_limit;
 		
 		$this->time = 0;
-		$this->distance = 3;
+		$this->distance = $base_distance;
 		
 		$player = array(0 => $this->attacker, 1 => $this->defender);
 		$status = array(0 => $this->create_status($player[0], $player[1]), 1 => $this->create_status($player[1], $player[0]));
 		$status[1]->aware_time = $this->get_aware_time($player[0], $player[1]);
 		
-		while ($this->time < 10 && (
+		while ($this->time < $combat_time_limit && (
 			$status[0]->in_battle && $this->distance <= $this->get_sight($player[0], $player[1]) ||
 			$status[1]->in_battle && $this->distance <= $this->get_sight($player[1], $player[0]))) {
 			

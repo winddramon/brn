@@ -6,6 +6,8 @@ class map_container_dtsp
 	protected $regions = array();
 	protected $areas = array();
 	protected $areas_static = array();
+	protected $keys_all_area = false;
+	protected $keys_area_by_region = false;
 
 	public function __construct($db)
 	{
@@ -44,7 +46,6 @@ class map_container_dtsp
 		}
 	}
 
-	//TODO：开局直接生成带有全部地图数据的json并存入数据库
 	public function load_static()
 	{//载入settings静态数据
 		global $regioninfo, $mapinfo;
@@ -158,7 +159,10 @@ class map_container_dtsp
 	public function ar($c = 'allkeys', $p = '')
 	{//自动识别是地图编号还是坐标，并返回地图对象
 		if ($c === 'allkeys') {
-			return array_keys($this->areas);
+			if(!$this->keys_all_area){//暂存常用的读取以减少无谓的运算
+				$this->keys_all_area = array_keys($this->areas);
+			}
+			return $this->keys_all_area;
 		} elseif ($c === 'all') {
 			return $this->areas;
 		} elseif ($c === '_id' && is_numeric($p)) {
@@ -170,17 +174,12 @@ class map_container_dtsp
 				}
 			}
 		} elseif ($c === 'r' && is_numeric($p)) {
-			$alist = array();
-
-			foreach ($this->areas as $aobj) {
-
-				if ($aobj->r == $p) {
-
-					$alist[$aobj->_id] = $aobj;
+			if(!$this->keys_area_by_region){
+				foreach ($this->areas as $aobj) {
+					$this->keys_area_by_region[$aobj->r][$aobj->_id] = $aobj;
 				}
 			}
-			//file_put_contents('a.txt', serialize($alist));
-			return $alist;
+			return $this->keys_area_by_region[$p];
 		}
 	}
 

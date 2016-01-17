@@ -656,8 +656,8 @@ EOT;
 	 * 添加N禁时新增的地图物品
 	 * 因为重写地图逻辑而重载此方法
 	 *
-	 * param $round(int) 禁区次数（开局是0）
-	 * return null
+	 * @param $round(int) 禁区次数（开局是0）
+	 * @return null
 	 */
 	protected function update_mapitem($round)
 	{
@@ -669,9 +669,9 @@ EOT;
 		}
 		$alllist = $m->ar();//TODO:编号为0的区域应该排除
 		$allregion = $m->rg();
-		$regionarea = Array();//获得每个区域已经生成的地图的id数组
+		$area_by_region = Array();//获得每个区域已经生成的地图的id数组
 		foreach($allregion as $arval){
-			$regionarea[$arval] = array_keys($m->ar('r',$arval));
+			$area_by_region[$arval] = array_keys($m->ar('r',$arval));
 		}
 		
 		$data = array();
@@ -714,7 +714,7 @@ EOT;
 				if(strpos($item[1],'RA')===0){//如果以RA开头则认为全图随机
 					$item[1] = $alllist;
 				}else{//此外则认为R之后的数字代表特定区域地图随机
-					$item[1] = $regionarea[intval(substr($item[1],1))];
+					$item[1] = $area_by_region[intval(substr($item[1],1))];
 				}
 			}else{
 				$item[1] = intval($item[1]);
@@ -743,6 +743,37 @@ EOT;
 		
 		return $db->batch_insert('items', $data, true);
 	}
+
+/*
+ * 因为重写地图逻辑而重载此函数
+ * 因为地图数目增加了很多，原99改为-1
+*/
+	protected function npc_area(&$player)
+	{
+		if(false === isset($player['pls'])){
+			$player['pls'] = 'RA';
+		}
+		if(strpos($player['pls'],'R') === 0){
+			global $m;
+			if ($player['pls'] == 'RA'){
+				$alist = $m->ar();
+			}else{
+				$astr = substr($player['pls'],1);
+				if(strpos($player['pls'],' ') !== false){
+					$alist = array();
+					foreach (explode(' ',$astr) as $aval){
+						$alist = array_merge($alist, array_keys($m->ar('r',$aval)));
+					}
+				}else{
+					$alist = array_keys($m->ar('r',$astr));
+				}
+			}
+			return $alist[array_rand($alist)];
+		}else{
+			return intval($player['pls']);
+		}
+	}
+
 	
 	//RUSH模式下，检测最终地图里存在多少个玩家，并冻结/解冻对应的倒计时
 	function check_all_laststand($cplayer = false, $time = 0){
