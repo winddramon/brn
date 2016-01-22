@@ -10,9 +10,9 @@ $explode_move_modulus = 0.9;
 
 $base_aware_time = 5;
 
-$base_distance = 5;//战斗开始的距离
+//$base_distance = 5;//战斗开始的距离。距离全部废弃
 
-$combat_time_limit = 8;//战斗的时间限制
+$combat_time_limit = 8;//战斗的时间上限，一般不会到这么长
 
 $base_attack_range = array(
 	'p' => 1,
@@ -61,7 +61,8 @@ class combat_status_timeline
 		} else if ($name === 'overload'){
 			return $this->combat->time < $this->overload_time;
 		} else {
-			throw 'Unexected property: '.$name;
+			$this->feedback('BUG: Unexected property: '.$name);
+			//throw 'Unexected property: '.$name;
 		}
 	}
 }
@@ -69,7 +70,7 @@ class combat_status_timeline
 class combat_dtsp extends combat
 {
 	public $time;
-	public $distance;
+//	public $distance;
 	
 	public function __construct(player $att, player $def)
 	{
@@ -98,38 +99,39 @@ class combat_dtsp extends combat
 		return $damage;
 	}
 	
-	public function set_distance($distance)
-	{
-		$this->distance = $distance;
-	}
+//	public function set_distance($distance)
+//	{
+//		$this->distance = $distance;
+//	}
 	
 	public function battle_start()
 	{
-		global $g,$base_distance,$combat_time_limit;
+		global $g,$combat_time_limit;
 		
 		$this->time = 0;
-		$this->distance = $base_distance;
-		
+//		$this->distance = $base_distance;
+		//TODO: 先制攻击的判定以及对时间轴的影响 要结合多重探索
 		$player = array(0 => $this->attacker, 1 => $this->defender);
 		$status = array(0 => $this->create_status($player[0], $player[1]), 1 => $this->create_status($player[1], $player[0]));
-		$status[1]->aware_time = $this->get_aware_time($player[0], $player[1]);
+		$status[1]->aware_time = $this->get_aware_time($player[0], $player[1]);//TODO: 根据双方的姿态和策略以及道具加成来判定
 		
-		while ($this->time < $combat_time_limit && (
-			$status[0]->in_battle && $this->distance <= $this->get_sight($player[0], $player[1]) ||
-			$status[1]->in_battle && $this->distance <= $this->get_sight($player[1], $player[0]))) {
-			
+//		while ($this->time < $combat_time_limit && (
+//			$status[0]->in_battle && $this->distance <= $this->get_sight($player[0], $player[1]) ||
+//			$status[1]->in_battle && $this->distance <= $this->get_sight($player[1], $player[0]))) {
+		while ($this->time < $combat_time_limit){
 			if ($status[0]->aware_time == $this->time) {
-				$this->feedback($player[0]->name.'发现了'.$player[1]->name);
+				if($this->time != 0) $this->feedback($player[0]->name.'发现了'.$player[1]->name);
 				$status[0]->preload_time = $this->time + $this->get_preload($status[0]->player, $status[1]->player);
 			}
 			
 			if ($status[1]->aware_time == $this->time) {
-				$this->feedback($player[1]->name.'发现了'.$player[0]->name);
+				if($this->time != 0) $this->feedback($player[1]->name.'发现了'.$player[0]->name);
 				$status[1]->preload_time = $this->time + $this->get_preload($status[1]->player, $status[0]->player);
 			}
+			//TODO: aware以后判定战斗中止时间
 			// Actions TODO: general reaction time
-			if ($this->allow_attack($status[0], $status[1])) {
-				$this->attack_round_timeline($status[0], $status[1]);
+			if ($this->allow_attack($status[0], $status[1])) {//TODO: 排除射程影响，射程只影响第一次攻击的前摇
+				$this->attack_round_timeline($status[0], $status[1]);//TODO: 单次战斗过程里排除连击，连击属性只影响连击次数以内的攻击前后摇
 					
 				if (!$player[1]->is_alive())
 					break;
@@ -141,18 +143,18 @@ class combat_dtsp extends combat
 					break;
 			}
 			
-			$relative_speed = 0;
+//			$relative_speed = 0;//DONE: 相对速度都去掉
 			$duration = 0;
 			
             // Move speed
-			$relative_speed += $this->get_relative_speed($status[0], $status[1]);
-			$relative_speed += $this->get_relative_speed($status[1], $status[0]);
+//			$relative_speed += $this->get_relative_speed($status[0], $status[1]);
+//			$relative_speed += $this->get_relative_speed($status[1], $status[0]);
 			
 			// Duration
-			$durations = $this->get_duration_candidates($status[0], $status[1], $relative_speed);
+			$durations = $this->get_duration_candidates($status[0], $status[1]);//DONE: 去除相对移动
 			
 			foreach($durations as $candidate) {
-				if ($candidate > 0 && ($candidate < $duration || $duration == 0)) {
+				if ($candidate > 0 && ($candidate < $duration || $duration == 0)) {//TODO: 目测这里可以直接去掉
 					$duration = $candidate;
 				}
 			}
@@ -163,10 +165,10 @@ class combat_dtsp extends combat
 			}
 			
 			$this->time += $duration;
-			$this->distance += $relative_speed * $duration;
-			if ($this->distance < 0) {
-				$this->distance = 0;
-			}
+//			$this->distance += $relative_speed * $duration;//DONE: 去除相对移动
+//			if ($this->distance < 0) {
+//				$this->distance = 0;
+//			}
 		}
 		
 		$this->feedback('战斗结束');
@@ -223,7 +225,7 @@ class combat_dtsp extends combat
 		return 0;
 	}
 	
-	protected function get_duration_candidates($status_1, $status_2, $relative_speed)
+	protected function get_duration_candidates($status_1, $status_2)
 	{
 		$duartions = array();
 		
@@ -235,13 +237,13 @@ class combat_dtsp extends combat
 		$durations[] = $status_2->preload_time - $this->time;
 		$durations[] = $status_1->aware_time - $this->time;
 		$durations[] = $status_2->aware_time - $this->time;
-		if ($relative_speed != 0)
-		{
-			$durations[] = ($this->get_sight($status_1->player, $status_2->player) - $this->distance) / $relative_speed;
-			$durations[] = ($this->get_sight($status_2->player, $status_1->player) - $this->distance) / $relative_speed;
-			$durations[] = ($this->get_range($status_1->player, $status_2->player) - $this->distance) / $relative_speed;
-			$durations[] = ($this->get_range($status_2->player, $status_1->player) - $this->distance) / $relative_speed;
-		}
+//		if ($relative_speed != 0)
+//		{
+//			$durations[] = ($this->get_sight($status_1->player, $status_2->player) - $this->distance) / $relative_speed;
+//			$durations[] = ($this->get_sight($status_2->player, $status_1->player) - $this->distance) / $relative_speed;
+//			$durations[] = ($this->get_range($status_1->player, $status_2->player) - $this->distance) / $relative_speed;
+//			$durations[] = ($this->get_range($status_2->player, $status_1->player) - $this->distance) / $relative_speed;
+//		}
 		
 		return $durations;
 	}
@@ -283,15 +285,15 @@ class combat_dtsp extends combat
 			!$status_att->preload &&
 			!$status_att->overload &&
 			!$status_att->stun &&
-			$status_att->aware &&
-			$this->get_range($status_att->player, $status_def->player) >= $this->distance;
+			$status_att->aware;
+//			$this->get_range($status_att->player, $status_def->player) >= $this->distance;
 	}
 	
 	protected function feedback($message)
 	{
 		$t = intval($this->time * 100) / 100;
-		$d = intval($this->distance * 100) / 100;
-		parent::feedback("[${t}s ${d}m] $message");
+//		$d = intval($this->distance * 100) / 100;
+		parent::feedback("[${t}s] $message");
 	}
 	
 	/******************* BRA codes ********************/
@@ -566,13 +568,13 @@ class combat_dtsp extends combat
 		
 		switch($this->weapon_kind($attacker)){
 			case 'g':
-				global $a, $map;
-				$a->action('notice', array('msg' => $map[$attacker->area].'传来了枪声'), array('$exception' => array($attacker->uid, $defender->uid)));
+				global $a, $m;
+				$a->action('notice', array('msg' => $m->ar('_id',$attacker->area)->n.'传来了枪声'), array('$exception' => array($attacker->uid, $defender->uid)));
 				break;
 			
 			case 'd':
-				global $a, $map;
-				$a->action('notice', array('msg' => $map[$defender->area].'传来了爆炸声'), array('$exception' => array($attacker->uid, $defender->uid)));
+				global $a, $m;
+				$a->action('notice', array('msg' => $m->ar('_id',$defender->area)->n.'传来了爆炸声'), array('$exception' => array($attacker->uid, $defender->uid)));
 				break;
 		}
 		return;

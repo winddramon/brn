@@ -17,7 +17,6 @@
   `hdamage` int(11) unsigned NOT NULL DEFAULT '0',
   `hplayer` varchar(15) NOT NULL DEFAULT '',
   `settings` varchar(15) NOT NULL DEFAULT 'default',
-  `maplist` varchar(2500) NOT NULL DEFAULT '[]',
   
   PRIMARY KEY (`gamenum`)
 )
