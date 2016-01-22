@@ -751,11 +751,71 @@ class item_dtsp extends item_bra
 					break;
 			}
 		}
+//		if($in_tolerance){
+//			$modulus = $tolerance['modulous'];
+//			$this->data['e'] *= $tolerance['modulous'];
+//		}else{
+//			$modulus = 1;
+//		}
+
+		$heal_type = array('H' => 'hp', 'S' => 'sp', 'B' => 'all');
+		$modulus = $this->player->get_potion_effect();
 		if($in_tolerance){
-			$this->data['e'] *= $tolerance['modulous'];
+			$modulus['hp'] *= $tolerance['modulous'];
+			$modulus['sp'] *= $tolerance['modulous'];
 		}
-		
-		parent::heal($kind);
+		if(isset($heal_type[$kind])){
+			$type = $heal_type[$kind];
+			global $healthinfo;
+			if($type === 'all'){
+				if($this->player->data['hp'] == $this->player->data['mhp'] && $this->player->data['sp'] == $this->player->data['msp']){
+					global $healthinfo;
+					$this->player->error($healthinfo['hp'].'与'.$healthinfo['sp'].'已经达到最大值，无需补充');
+				}else{
+					if(isset($this->data['sk']['poison'])){
+						//毒
+						$damage_source = array('type' => 'poison');
+						if(isset($this->data['sk']['poison-applier'])){
+							$damage_source['pid'] = $this->data['sk']['poison-applier'];
+						}
+						$damage = $this->player->damage($this->data['e'], $damage_source);
+						$this->player->buff('poison', $this->data['sk']['poison']);
+						$this->player->feedback('糟糕，'.$this->data['n'].'有毒，你中毒了，并失去了'.$damage.'点'.$healthinfo['hp']);
+					}else{
+
+						$hp_add = $this->player->heal('hp', $this->data['e'] * $modulus['hp']);
+						$sp_add = $this->player->heal('sp', $this->data['e'] * $modulus['sp']);
+						$this->player->feedback($this->data['n'].'使用成功，'.$healthinfo['hp'].'增加了'.strval($hp_add).'，'.$healthinfo['sp'].'增加了'.strval($sp_add));
+					}
+				}
+
+			}else if(isset($this->player->data[$type])){
+				if($this->player->data[$type] >= $this->player->data['m'.$type]){
+					$this->player->error($healthinfo[$type].'已经达到最大值，无需补充');
+				}else{
+					if(isset($this->data['sk']['poison'])){
+						//毒
+						$damage_source = array('type' => 'poison');
+						if(isset($this->data['sk']['poison-applier'])){
+							$damage_source['pid'] = $this->data['sk']['poison-applier'];
+						}
+						$damage = $this->player->damage($this->data['e'], $damage_source);
+						$this->player->buff('poison', $this->data['sk']['poison']);
+						$this->player->feedback('糟糕，'.$this->data['n'].'有毒，你中毒了，并失去了'.$damage.'点'.$healthinfo['hp']);
+					}else{
+						$point_add = $this->player->heal($type, $this->data['e'] * $modulus[$type]);
+						$this->player->feedback($this->data['n'].'使用成功，'.$healthinfo[$type].'增加了'.strval($point_add));
+					}
+				}
+			}else{
+				$this->player->feedback('这补给品似乎是补充某种未知能力的');
+			}
+			$this->player->ajax('health', array('hp' => $this->player->hp, 'sp' => $this->player->sp));
+		}else{
+			$this->player->feedback('这补给品似乎没有效果');
+		}
+
+		$this->consume();
 		
 		foreach($this->player->buff as &$buff){
 			switch($buff['type']){
@@ -781,9 +841,9 @@ class item_dtsp extends item_bra
 			}
 		}
 		
-		if($in_tolerance && $this->data['s']){
-			$this->data['e'] /= $tolerance['modulous'];
-		}
+//		if($in_tolerance && $this->data['s']){
+//			$this->data['e'] /= $tolerance['modulous'];
+//		}
 		
 		//副作用实现
 		if(isset($this->data['sk']['side-effect'])){
